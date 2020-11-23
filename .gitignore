@@ -1,2 +1,3 @@
 *.csv
 .ipynb_checkpoints
+pytorch-data
