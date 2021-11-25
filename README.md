@@ -1,4 +1,4 @@
-# Data science: modelling and machine learning with probabilitu
+# Data science: modelling and machine learning with probability
 
 These code snippets accompany a course taught at Cambridge University in the Computer Science department, by Dr Damon Wischik.
 * [YouTube videos](https://www.youtube.com/playlist?list=PLknxdt7zG11MLG2w-l05ev7LbgTCStQ6a)
