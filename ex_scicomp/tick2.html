@@ -3,7 +3,7 @@
 <head><meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>tick1</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
+<title>tick2</title><script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.1.10/require.min.js"></script>
 
 
 
@@ -14248,145 +14248,32 @@ a.anchor-link {
 
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Tick-1:-numpy">Tick 1: numpy<a class="anchor-link" href="#Tick-1:-numpy">&#182;</a></h1>
+<h1 id="Tick-2:-pandas">Tick 2: pandas<a class="anchor-link" href="#Tick-2:-pandas">&#182;</a></h1><p>We'll be working with data on the COVID-19 pandemic assembled by researchers at Johns Hopkins university.
+(For more about the dataset, 
+please see <a href="https://doi.org/10.1016/S1473-3099(20"><em>An interactive web-based dashboard to track COVID-19 in real time</em></a>30120-1) by Dong, Du, and Gardner, The Lancet, May 2020.)
+For consistency of grading, we'll work with a snapshot taken on 13 December and available as <a href="https://www.cl.cam.ac.uk/teaching/2021/DataSci/data/covid_global_20201210.csv">https://www.cl.cam.ac.uk/teaching/2021/DataSci/data/covid_global_20201210.csv</a>. If you want to re-run your analyses on up-to-date data, the code to retrieve it is given in the appendix.</p>
+<div class="alert alert-warning">This assignment tests your understanding of the pandas library. YOUR CODE MUST USE PANDAS OPERATIONS such as groupby to split and process the data. Do not use Python 'for' loops or list comprehensions (except in plotting code).
+</div><p>Some questions ask you to prepare a DataFrame, others a table (i.e. a Series). It doesn't matter what order the rows and columns are in, only the contents.</p>
+
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p>In this tick we'll implement a simple epidemic simulator.</p>
-<p>In our simulator, each person's state is either <strong>S</strong>usceptible, or <strong>I</strong>nfected, or <strong>P</strong>rotected (protected either by vaccine or by having recovered from infection). We will implement an <em>agent-based simulator</em> in which we keep track of the state of every person; this is in contrast to aggregate equation-based simulators in which we only keep track of the total number of people in each state.</p>
-<p>Our simulator will be a discrete-time simulator, one timestep per day. Each day,</p>
+<h3 id="Tips-on-how-to-structure-your-notebooks">Tips on how to structure your notebooks<a class="anchor-link" href="#Tips-on-how-to-structure-your-notebooks">&#182;</a></h3><p>It's a good habit to tidy up your notebook as you go. While I'm developing a solution I have processing and printouts and answer submission interspersed, but then I tidy it all up and clearly separate out the pieces into:</p>
 <ol>
-<li>Each person chooses to socialize (with probability <code>prob_socialize</code>) or to isolate.</li>
-<li>The people who chose to socialize are randomly grouped into pairs.</li>
-<li>Within each pair, if one is <strong>I</strong>nfected and the other not, then the other might become <strong>I</strong>nfected. The probability of infection is either <code>prob_infect_susceptible</code> or <code>prob_infect_protected</code> depending on their state.</li>
-<li>At the end of the day, each person who was <strong>I</strong>nfected at the start of the day recovers with probability <code>prob_recover</code>, and become <strong>P</strong>rotected.</li>
+<li><p><strong>Data import.</strong>
+Data is sacrosanct. It should be loaded in, then treated as immutable. I like to put all my data import routines right at the top, so that the reader can easily see the basis for my conclusions. Always cite your sources. My personal convention is to use ALLCAPS for raw imported data (the same convention as for global constants).</p>
+</li>
+<li><p><strong>Data processing.</strong>
+This is a block of code that defines all the dataframes I'll want to reuse. I give these dataframes meaningful names, and document the names. When I want to come back to the notebook and do further work, I can just run this block of code and not be slowed down by printouts and autograder etc. This block of code could just as well exist in a standaline .py file.</p>
+</li>
+<li><p><strong>Data analysis, and answer submission.</strong>
+Here I have a chunk of code, one for each question. I only create throwaway dataframes here, never reusing them from question to question, so each chunk of code is independent of all the others. This makes it easier for me to dive in and work on one answer, without having to rerun the entire notebook.
+Also, I use generic variable names like <code>df</code>, so I'm not tempted to reuse the results. All I'll use is the named and documented processed data from section 2, and I won't modify them.</p>
+</li>
 </ol>
-<p>A simple probability calculation shows that the average number of days a person is <strong>I</strong>nfected is <code>days = 1/prob_recover</code>. The average number of people that a single infected individual would infect during the course of their infection, in an entirely <strong>S</strong>usceptible population, is <em>R</em><sub>0</sub>&nbsp;=&nbsp;<code>days * prob_socialize * prob_infect_susceptible</code>.</p>
-<p>In tick 1a we will use this simulator to look at how vaccination rate affects the <em>R</em> number. Then in tick 1b we'll modify the simulator slightly, to use location-based grouping rather than random grouping, in order to see how restricting travel affects the <em>R</em> number.</p>
 
 </div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div class="alert alert-warning">This assignment tests your vectorized thinking. You will be asked to run simulations on a population of tens of thousands of individuals. <strong>YOUR CODE MUST USE NUMPY VECTORIZED OPERATIONS</strong> to iterate over the population. Do not use Python 'for' loops or list comprehensions, and do not use <code style="background-color:inherit">np.vectorize</code> either. For any other iteration, e.g. over simulated timesteps, or over simulation parameters, it's a good idea to use 'for' loops or list comprehension.
-</div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Thoughts-about-modelling">Thoughts about modelling<a class="anchor-link" href="#Thoughts-about-modelling">&#182;</a></h3><p>This epidemic simulator is a very simple model!</p>
-<p>There are all sorts of ways we might make it more complex: we could allow larger groups, and multiple interactions per day; we could imagine that each person has their own proclivities for socializing and group size; we could allow infectivity to vary from person to person or day to day; and so on. But it's generally not a good idea to make a model more complex than it has to be to answer the question at hand. The more complex the model, the more parameters there are to pick values for, and the harder it is to (a) fit the parameters to the real world, (b) come up with a useful answer. And a great deal of useful real-world epidemiology is done with even simpler models, namely aggregate equation-based simulators.</p>
-<p>Our simulator is just about the simplest possible simulator that will let us investigate the question of restricting travel. The goal of a simple simulator like this isn't to make precise numerical forecasts. It's to learn qualitatively which factors are important and which factors are unimportant &mdash; in other words, to learn which factors it would be useful to incorporate into a more complex simulator and which factors we can leave out.</p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="How-to-submit-answers-using-the-autograder">How to submit answers using the autograder<a class="anchor-link" href="#How-to-submit-answers-using-the-autograder">&#182;</a></h3><p>Each question comes with instructions on how to submit your answer. 
-Here's a video explanation, if you prefer videos.</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[2]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
-<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s1">&#39;2Tud7FXhYP4&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">560</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">303</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[2]:</div>
-
-
-
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
-
-        <iframe
-            width="560"
-            height="315"
-            src="https://www.youtube.com/embed/2Tud7FXhYP4?start=303"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
-        
-</div>
-
-</div>
-
-</div>
-
-</div>
-
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h3 id="Tips-on-how-to-structure-your-notebooks">Tips on how to structure your notebooks<a class="anchor-link" href="#Tips-on-how-to-structure-your-notebooks">&#182;</a></h3><p>You should follow Marie Kondo's advice: "If a line of code does not spark joy, delete it."</p>
-<p>You are free to structure your code however you like &mdash; you don't have to 
-give your functions the names and arguments that this notebook describes. Indeed, as you 
-declutter your notebook, you may find it helpful to rewrite it as a single simulator function
-that can be used for both tick 1a and 1b.</p>
-
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell   ">
-<div class="jp-Cell-inputWrapper">
-<div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[4]:</div>
-<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
-     <div class="CodeMirror cm-s-jupyter">
-<div class=" highlight hl-ipython3"><pre><span></span><span class="kn">from</span> <span class="nn">IPython.display</span> <span class="kn">import</span> <span class="n">YouTubeVideo</span>
-<span class="n">YouTubeVideo</span><span class="p">(</span><span class="s1">&#39;2Tud7FXhYP4&#39;</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">560</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="mi">315</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">490</span><span class="p">)</span>
-</pre></div>
-
-     </div>
-</div>
-</div>
-</div>
-
-<div class="jp-Cell-outputWrapper">
-
-
-<div class="jp-OutputArea jp-Cell-outputArea">
-
-<div class="jp-OutputArea-child">
-
-    
-    <div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
-
-
-
-<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html">
-
-        <iframe
-            width="560"
-            height="315"
-            src="https://www.youtube.com/embed/2Tud7FXhYP4?start=490"
-            frameborder="0"
-            allowfullscreen
-        ></iframe>
-        
-</div>
-
-</div>
-
-</div>
-
-</div>
-
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
@@ -14395,175 +14282,449 @@ that can be used for both tick 1a and 1b.</p>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Tick-1a---worth-1-mark">Tick 1a - worth 1 mark<a class="anchor-link" href="#Tick-1a---worth-1-mark">&#182;</a></h1>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q1).</strong> The model needs us to randomly group the people who socialize into pairs. Suppose there are $M$ of them. We can group them into pairs 
-as follows. First, randomly permuting the vector $[0,1,\dots,M-1]$. Let <code>m1</code> consist of the first $M//2$ items and <code>m2</code> consist of the next $M//2$ items. Interpret this as "<code>m1[i]</code> is paired with <code>m2[i]</code>". We're using $M//2$ rather than $M/2$ in case $M$ is odd, in which case there's one person left over who doesn't join in a pair.</p>
-<p>Write a function <code>pairs(M)</code> that returns the tuple <code>(m1,m2)</code>. For example if you run <code>pairs(6)</code> you might get the output</p>
-
-<pre><code>(array[(3, 0, 1)], array([2, 4, 5]))</code></pre>
-<p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ucamcl</span>
+<h2 id="Tick-2a---worth-1-mark">Tick 2a - worth 1 mark<a class="anchor-link" href="#Tick-2a---worth-1-mark">&#182;</a></h2><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ucamcl</span>
 <span class="n">GRADER</span> <span class="o">=</span> <span class="n">ucamcl</span><span class="o">.</span><span class="n">autograder</span><span class="p">(</span><span class="s1">&#39;https://markmy.solutions&#39;</span><span class="p">,</span> <span class="n">course</span><span class="o">=</span><span class="s1">&#39;scicomp&#39;</span><span class="p">)</span>
-<span class="n">GRADER1a</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick1a&#39;</span><span class="p">)</span>
-<span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1a</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q1&#39;</span><span class="p">)</span>
-<span class="n">m1</span><span class="p">,</span><span class="n">m2</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">]))),</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m1</span><span class="o">-</span><span class="n">m2</span><span class="p">))}</span>
-<span class="n">GRADER1a</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
+<span class="n">GRADER2a</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick2a&#39;</span><span class="p">)</span>
 </pre></div>
+<p>The first step in any data science work is to find out what the dataset consists of, and to preprocess it into a form that we can work with. Typically, this takes around 70% of a data scientist's time. Our overall goal in Tick 2a is to produce a dataframe <code>covidc</code> (the <code>c</code> stands for clean) with one row per country&times;date, and a second dataframe <code>ukc</code> which integrates UK vaccination data.</p>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q2).</strong> Let <code>popn</code> be a vector with one entry per person in the population, with values <code>0</code> for <strong>S</strong>usceptible, <code>1</code> for <strong>P</strong>rotected, <code>2</code> for <strong>I</strong>nfected. Write a function <code>is_exposed(popn, m1, m2)</code> which returns a boolean vector of the same length as <code>popn</code>, indicating whether each person was in a group with an <strong>I</strong>nfected person. For example,</p>
-
-<pre><code>is_exposed(np.array([0,0,2,0,0,1]), np.array([3,0,1]), np.array([2,4,5]))</code></pre>
-<p>should return</p>
-
-<pre><code>array([False, False,  True,  True, False, False])</code></pre>
+<p><strong>Question (q1).</strong> Import the csv file and print out a few lines, choosing the lines at random. The file
+includes some rows that don't correspond to countries; for these rows <code>Population</code> is missing. Remove these rows, and store what's left as the data frame <code>covid</code>. How many rows are left?</p>
 <p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1a</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q2&#39;</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="n">is_exposed</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">popn</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">m1</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">m2</span><span class="p">)</span>
-<span class="n">GRADER1a</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
+
+<pre><code>num_rows = ...
+GRADER2a.submit_answer(GRADER2a.fetch_question('q1'), num_rows)</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q3).</strong> Write a function <code>update(popn, prob)</code> to simulate one day. Here <code>prob</code> is a dictionary, e.g.</p>
-
-<pre><code>prob = {'socialize': 0.8, 'infect_susceptible': 0.6, 'infect_protected': 0.1, 'recover': 0.1}</code></pre>
-<p>Your function should return a pair <code>(popn, new_infected)</code> where <code>popn</code> is the updated population vector and <code>new_infected</code> is the number of people who became infected this day.</p>
-<p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1a</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q3&#39;</span><span class="p">)</span>
-<span class="n">popn</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">q3</span><span class="o">.</span><span class="n">n</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">q3</span><span class="o">.</span><span class="n">i0</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
-<span class="n">popn2</span><span class="p">,</span><span class="n">new_infected</span> <span class="o">=</span> <span class="n">update</span><span class="p">(</span><span class="n">popn</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">prob</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;i&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">popn2</span><span class="o">==</span><span class="mi">2</span><span class="p">),</span> <span class="s1">&#39;ni&#39;</span><span class="p">:</span><span class="n">new_infected</span><span class="p">}</span>
-<span class="n">GRADER1a</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q4).</strong> Write a function <code>sim(N, T, i0, p0, prob)</code> to simulate <code>T</code> days on a population of size <code>N</code>, of whom <code>i0</code> are <strong>I</strong>nfected and <code>p0</code> are <strong>P</strong>rotected at the beginning of day 0. It should return a matrix with <code>T</code> rows and 4 columns. The four columns of row $i$ should be (1) the number of
-<strong>S</strong>usceptible, (2) <strong>P</strong>rotected, and (3) <strong>I</strong>nfected people at the end of day $i$, as well as (4) the number of new infections that day.</p>
-<p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1a</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q4&#39;</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">sim</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">i0</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">i0</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">p0</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">prob</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">/</span> <span class="n">q</span><span class="o">.</span><span class="n">N</span>
-<span class="n">GRADER1a</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
-<div class="alert alert-warning">The autograder does NOT verify that your code is correct. It's entirely possible to have buggy code that passes (q3) but fails (q4). It's your job to do your own testing!
-</div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q5).</strong> Simulate a population of <code>N=50000</code> over <code>T=200</code> days with <code>i0=100</code> and <code>p0=30000</code>, with the probabilities as in question (q3). Plot the percentage of the population in each of the three states, with day number on the horizontal axis. Also plot the number of new infections each day.</p>
-<p><em>You don't have to submit your plot to the autograder, but you must include it in your submitted notebook. Your plots should look something like this. In your plots, you should pay attention to (1) making sure the two plots share the same x-axis, (2) colouring the lines and showing a legend. Don't worry about fine-grained control of the plot, such as legend placement or plot size or colour schemes.</em></p>
-<p><img src="res/tick1_sim.svg" style="width:30em"/></p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q6).</strong> Repeat the simulation from question (q5), but with <code>p0=0</code>, with <code>p0=15000</code>, and with <code>p0=30000</code>. Run five simulations at each value of <code>p0</code>. Plot the percentage of the population infected.</p>
-<p><em>Again, you don't have to submit your plot to the autograder, but you must include it in your submitted notebook. Your plots should look something like this.</em></p>
-<p><img src="res/tick1_p0.svg" style="width:30em"/></p>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div style="width:100%; background-color:rgb(100,105,120); width:100%; height:.2em; margin-top:5em"></div>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Tick-1b---worth-1-mark">Tick 1b - worth 1 mark<a class="anchor-link" href="#Tick-1b---worth-1-mark">&#182;</a></h1>
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q7).</strong> A simple way to estimate the <em>R</em> number is <code>R=days*N/D</code> where <code>N</code> is the total number of new infections in a window of time, where <code>D</code> is total number of infected-person-days, i.e. what you get by summing the number of infected people at the <em>start</em> of each day in the window, and 
-where
-<code>days=1/prob_recover</code> is the average number of days a person is infected.
-Write a function</p>
-<div class="highlight"><pre><span></span><span class="n">r</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="p">,</span> <span class="n">days</span><span class="p">)</span>
-</pre></div>
-<p>to compute the <em>R</em> number, where <code>x</code> is the matrix produced by your simulator, and <code>N</code> and <code>D</code> are computed over days <code>t0,t0+1,...,t1-1</code>.</p>
-<p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">GRADER1b</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick1b&#39;</span><span class="p">)</span>
-<span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1b</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q7&#39;</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="n">r</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">x</span><span class="p">),</span> <span class="n">t0</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">days</span><span class="p">)</span>
-<span class="n">GRADER1b</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
-
-</div>
-</div>
-<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q8).</strong> Compute the average <em>R</em> number for each of the three scenarios in question (q6), averaged over the five simulation runs, over the window <code>t0=7, t1=14</code>.</p>
-<p><em>There is nothing to submit for this question. You code should produce these answers:</em></p>
+<p><strong>Question (q2).</strong> Complete this data frame listing the unique <code>(Country/Region, Province/State)</code> pairs that you removed.</p>
 <table>
 <thead><tr>
-<th><code>p0</code></th>
-<th><em>R</em></th>
+<th><strong>Country/Region</strong></th>
+<th><strong>Province/State</strong></th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>0</td>
-<td>4.37</td>
-</tr>
-<tr>
-<td>15000</td>
-<td>3.45</td>
-</tr>
-<tr>
-<td>30000</td>
-<td>2.43</td>
+<td>Diamond Princess</td>
+<td>NaN</td>
 </tr>
 </tbody>
 </table>
+
+<pre><code>ans = ... # your answer as a DataFrame
+GRADER2a.submit_answer(GRADER2a.fetch_question('q2'), ans)</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q9).</strong> In these simulations, the epidemic grows exponentially, reaches a peak, then dies down. In the UK however, over summer 2021, COVID levels seemed to reach a level and fluctuate around that level. What might explain this? One possible answer is that it's due to limiting social interactions: if people mainly socialize in a small social circle, then the epidemic will burn through the population steadily rather than explosively &mdash; like a candle rather than like gunpowder.</p>
-<p>Write a function <code>localpairs(M, σ)</code> which works as follows. Let each person $i$ go to location $i + X_i$ where $X_i$ is a Gaussian random variable with mean 0 and standard deviation <code>σ</code>. (Such a random variable can be generated using <code>np.random.normal(loc=0, scale=σ)</code>. Generate new random variables each day.) Then sort people in order of location. The first two people in this sorted list form a pair, the second two form a pair, and so on. Thus, if <code>σ</code> is small then people will mostly socialize with the same people, and if <code>σ</code> is very large then it will be like the full random mixing from tick 1a.</p>
-<p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1b</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q9&#39;</span><span class="p">)</span>
-<span class="n">m1</span><span class="p">,</span><span class="n">m2</span> <span class="o">=</span> <span class="n">localpairs</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">σ</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">]))),</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m1</span><span class="o">-</span><span class="n">m2</span><span class="p">))}</span>
-<span class="n">GRADER1b</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
+<p><strong>Question (q3).</strong> The dataset has columns for <code>Country/Region</code> as well as for <code>Province/State</code>. To get a sense of what these contain, let's look at the UK. Complete this table listing the number of rows for each different <code>Province/State</code> linked to the UK. Include the case where <code>Province/State</code> is NaN.</p>
+<table>
+<thead><tr>
+<th><strong>Province/State</strong></th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Anguilla</strong></td>
+<td>688</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ans = ... # your answer as a table
+GRADER2a.submit_answer(GRADER2a.fetch_question('q3'), ans.reset_index(name='n'))</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q4).</strong> Most countries our <code>covid</code> dataframe appear as <code>Country/Region=x, Province/State=NaN</code>, but there are a few, like the UK, that have non-NaN entries for <code>Province/State</code>. Let's look at all of them. Complete the following dataframe, which lists all eight such countries. Here <code>metropole</code> is 1 if the country has a <code>Province/State=NaN</code> entry, 0 otherwise; and <code>provinces</code> is the number of distinct non-NaN values.</p>
+<table>
+<thead><tr>
+<th><strong>Country/Region</strong></th>
+<th><strong>metropole</strong></th>
+<th><strong>provinces</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Australia</td>
+<td>0</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Canada</td>
+<td>1</td>
+<td>13</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ans = ... # your answer as a DataFrame
+GRADER2a.submit_answer(GRADER2a.fetch_question('q4'), ans)</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q5).</strong> Upon closer inspection of these special-case countries, we conclude there are two types of special case:</p>
+<ul>
+<li>For Australia, Canada, and China, we should add up the COVID statistics for each of the provinces</li>
+<li>For Denmark, France, Netherlands, New Zealand, and UK, we should only keep the <code>Province/State=NaN</code> entries and discard the others.</li>
+</ul>
+<p>Prepare a dataset <code>covidc</code> which fixes up the data for these special-case countries, and includes all the non-special-case countries as is. In addition,</p>
+<ul>
+<li>convert the date strings to proper dates</li>
+<li>merge in <code>Population</code> values and <code>iso3</code> codes from
+<a href="https://www.cl.cam.ac.uk/teaching/2122/DataSci/data/covidcountries_20210831.csv">https://www.cl.cam.ac.uk/teaching/2122/DataSci/data/covidcountries_20210831.csv</a>, since the Population values in the original dataset don't account for the special-cased countries</li>
+<li>sort the dataset by <code>Country/Region</code> then by <code>Date</code></li>
+</ul>
+<table>
+<thead><tr>
+<th><strong>Country/Region</strong></th>
+<th><strong>Date</strong></th>
+<th><strong>Confirmed</strong></th>
+<th><strong>Deaths</strong></th>
+<th><strong>Population</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Canada</td>
+<td>2021-09-05</td>
+<td>1522599</td>
+<td>27071</td>
+<td>38246108</td>
+</tr>
+<tr>
+<td>Denmark</td>
+<td>2021-07-28</td>
+<td>314135</td>
+<td>2547</td>
+<td>5837213</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>covidc = ... # your answer as a DataFrame
+
+q = GRADER2a.fetch_question('q5')
+want_rows = pandas.DataFrame(q.rows).assign(Date=lambda df: pandas.to_datetime(df.Date))
+submit = covidc.merge(want_rows)[q.cols].assign(Date=lambda df: df.Date.astype(str))
+GRADER2a.submit_answer(q, {'num_rows': len(covidc), 'details': submit})</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q6).</strong> For the UK, we have an additional dataset: <a href="https://www.cl.cam.ac.uk/teaching/2122/DataSci/data/covidvax_uk_20211209.csv">https://www.cl.cam.ac.uk/teaching/2122/DataSci/data/covidvax_uk_20211209.csv</a>, downloaded from <a href="https://coronavirus.data.gov.uk/details/download">coronavirus.data.gov</a>, with vaccination data. Create a dataframe consisting of the UK rows from <code>covidc</code>, with an additional column <code>totvax2</code> giving the cumulative number of people who have received their second vaccination dose.</p>
+<table>
+<thead><tr>
+<th><strong>Date</strong></th>
+<th><strong>Confirmed</strong></th>
+<th><strong>Deaths</strong></th>
+<th><strong>Population</strong></th>
+<th><strong>totvax2</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2020-12-10</td>
+<td>1787783</td>
+<td>63082</td>
+<td>67886004</td>
+<td>7199</td>
+</tr>
+<tr>
+<td>2021-12-01</td>
+<td>10276007</td>
+<td>145140</td>
+<td>67886004</td>
+<td>42696015</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ukc = ... # your answer as a DataFrame
+
+q = GRADER2a.fetch_question('q6')
+dates = pandas.to_datetime(q.dates)
+submit = ukc.loc[ukc.Date.isin(dates), q.cols].assign(Date=lambda df: df.Date.astype(str))
+GRADER2a.submit_answer(q, {'num_rows': len(c), 'details': submit})</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<div style="width:100%; background-color:rgb(100,105,120); width:100%; height:.2em; margin-top:10em"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Tick-2b---worth-1-mark">Tick 2b - worth 1 mark<a class="anchor-link" href="#Tick-2b---worth-1-mark">&#182;</a></h2><div class="highlight"><pre><span></span><span class="n">GRADER2b</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick2b&#39;</span><span class="p">)</span>
 </pre></div>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q10).</strong> Modify the simulator to use <code>localpairs</code>. Run simulations with the same parameters as in question (q5) but with <code>p0=0</code> and <code>σ</code> either 5, or 20, or 100. Run five simulations for each value of <code>σ</code>. Plot the percentage of the population infected.</p>
-<p><em>Again, you don't have to submit your plot to the autograder, but you must include it in your submitted notebook. Your plots should look something like this.</em></p>
-<p><img src="res/tick1_sigma.svg" style="width:30em"/></p>
+<p><strong>Question (q7).</strong> Let's start by getting a general view of the data on cases and deaths. We'll look at the UK, since it's more comprehensible to start with a single country which we're familiar with.
+With the dataset <code>ukc</code>,</p>
+<ol>
+<li>Define a column <code>new_confirmed</code> giving the number of newly confirmed cases each day, and similarly <code>new_deaths</code>.</li>
+<li>Define a column <code>smooth_new_confirmed</code> to be the average of <code>new_confirmed</code> over the past 7 days. </li>
+</ol>
+<p><em>This dataset happens to have one record for every date, so newly confirmed cases are just the differences between successive items.
+It's good practice to first check that there is one record per date, with an <code>assert</code> statement. For the rolling average,
+pandas provides <a href="https://pandas.pydata.org/pandas-docs/stable/reference/api/pandas.Series.rolling.html"><code>rolling</code></a>.</em></p>
+<table>
+<thead><tr>
+<th><strong>Date</strong></th>
+<th><strong>Confirmed</strong></th>
+<th><strong>Deaths</strong></th>
+<th><strong>new_confirmed</strong></th>
+<th><strong>new_deaths</strong></th>
+<th><strong>smooth_new_confirmed</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>2020-01-30</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>2020-01-31</td>
+<td>2</td>
+<td>0</td>
+<td>2</td>
+<td>0</td>
+<td>0.2857</td>
+</tr>
+<tr>
+<td>2020-02-01</td>
+<td>2</td>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+<td>0.2857</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ans = ... # your answer as a DataFrame
+q = GRADER2b.fetch_question('q7')
+dates = pandas.to_datetime(q.dates)
+submit = ans.loc[ans.Date.isin(dates), q.cols].assign(Date=lambda df: df.Date.astype(str))
+GRADER2b.submit_answer(q, submit)</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<p><strong>Question (q11).</strong> Compute the <em>R</em> number for a simulation run.</p>
-<p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER1b</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q11&#39;</span><span class="p">)</span>
-<span class="n">x</span> <span class="o">=</span> <span class="n">sim_with_locality</span><span class="p">(</span><span class="n">N</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">N</span><span class="p">,</span> <span class="n">T</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span> <span class="n">i0</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">i0</span><span class="p">,</span> <span class="n">p0</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">p0</span><span class="p">,</span> <span class="n">prob</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">prob</span><span class="p">,</span> <span class="n">σ</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">σ</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="n">r</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">t0</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">t0</span><span class="p">,</span> <span class="n">t1</span><span class="o">=</span><span class="n">q</span><span class="o">.</span><span class="n">t1</span><span class="p">,</span> <span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="o">/</span><span class="n">q</span><span class="o">.</span><span class="n">prob</span><span class="p">[</span><span class="s1">&#39;recover&#39;</span><span class="p">])</span>
-<span class="n">GRADER1b</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
+<p><strong>Question (q8).</strong> Plot two bar charts, one showing the number of daily confirmed cases, the other showing the number of daily deaths. On your first bar chart, also plot the weekly-smoothed values. Also plot the percent of the population that has been double-vaccinated.</p>
+<p><em>You don't have to submit your plot to the autograder, but you <strong>must</strong> include it in your submitted notebook. Your plot should look something like this. In your plot, you should pay attention to (1) making sure the subplots share the same x-axis, (2) making sure the x-axis ticks are legible. Don't worry about fine-grained control of the plot, such as plot size or colour scheme.</em></p>
+<p><img src="res/tick2_uk-timeseries.svg" style="width:45em"/></p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q9).</strong> The UK has experienced three waves. In <code>wave1</code> (dates before 2020-08-01) there was under-reporting of cases, and no vaccine. In <code>wave2</code> (dates before 2021-05-01) there was full reporting, but still hardly any vaccination. In <code>wave3</code>, vaccination is more widespread. Let's see how this impacts case fatality rate.</p>
+<p>Split the data into these three waves. For each wave, count the number of cases and deaths, and compute the case fatality rate (deaths divided by cases). Also report the vaccination rate as a fraction of total population, at the end of the wave.</p>
+<table>
+<thead><tr>
+<th><strong>wave</strong></th>
+<th><strong>Confirmed</strong></th>
+<th><strong>Deaths</strong></th>
+<th><strong>vaxrate</strong></th>
+<th><strong>cfr</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>wave1</td>
+<td>303181</td>
+<td>41189</td>
+<td>0</td>
+<td>0.1359</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ans = ... # your answer as a DataFrame
+GRADER2b.submit_answer(GRADER2b.fetch_question('q9'), ans)</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q10).</strong> We'd like to know the overall case fatality rate for each country.
+Prepare a dataframe that lists this information.
+Only use data from 2020-08-01 onwards, since case numbers before then are unreliable.</p>
+<p><em>Case fatality rate gives us a hint about quality of healthcare, but it's a huge simplification
+because of differences in how countries define "death due to COVID" and in demographics. Nonetheless, it's a useful starting point.</em></p>
+<table>
+<thead><tr>
+<th><strong>Country/Region</strong></th>
+<th><strong>Confirmed</strong></th>
+<th><strong>Deaths</strong></th>
+<th><strong>cfr</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>France</td>
+<td>7697355</td>
+<td>87556</td>
+<td>0.011375</td>
+</tr>
+<tr>
+<td>United Kingdom</td>
+<td>10357800</td>
+<td>104946</td>
+<td>0.010132</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ans = ... # your answer as a DataFrame
+q = GRADER2b.fetch_question('q10')
+submit = ans.loc[ans['Country/Region'].isin(q.countries), q.cols]
+GRADER2b.submit_answer(q, submit)</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q11).</strong> Plot the number of deaths and the number of confirmed cases for selected countries, using your answer from question (q10), on a log-log scale. Also plot guides to indicate case fatality rates of 0.5%, 1%, and 2%. Show these countries:</p>
+
+<pre><code>['Austria','Belgium','Czechia','Denmark','Finland','France','Germany',
+ 'Greece','Hungary','Ireland','Italy',
+ 'Netherlands','Norway','Poland','Portugal','Spain','Sweden','Switzerland','United Kingdom',
+ 'Australia','US','Canada','Japan','China','Russia','Ukraine','India']</code></pre>
+<p><em>You don't have to submit your plot to the autograder, but you <strong>must</strong> include it in your submitted notebook. Your plot should look something like this. Don't worry about fine-grained control of the plot, such as plot size or colour scheme or exact placement of labels.</em></p>
+<p><img src="res/tick2_cfr.svg" style="width:35em"/></p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q12).</strong> For each country,</p>
+<ul>
+<li>Find the number of <code>new_confirmed</code> cases and <code>smooth_new_confirmed</code> as in question (q7). </li>
+<li>Define a column <code>infected</code> which gives the total number of <code>smooth_new_confirmed</code> over the past $d$ days, where $d=10$ is the average duration of an infection &mdash; this is a crude guess at the number of currently infected people. In maths notation, let $I_t=S_{t-d+1}+\cdots+S_t.$</li>
+<li>Define a column <code>inc</code> which measures the relative change. In maths notation, let $\Delta_t=I_t/I_{t-1}$.</li>
+<li>Define a column <code>R</code> which reports the daily $R$ number, which can be estimated using $R_t=d(\Delta_t-1)+1$.</li>
+</ul>
+<div class="alert alert-warning">Your code must use pandas operations such as groupby to split and process the data. Do not use Python 'for' loops or list comprehensions.
+</div><table>
+<thead><tr>
+<th><strong>Country/Region</strong></th>
+<th><strong>Date</strong></th>
+<th><strong>Confirmed</strong></th>
+<th><strong>new_confirmed</strong></th>
+<th><strong>smooth_new_confirmed</strong></th>
+<th><strong>infected</strong></th>
+<th><strong>inc</strong></th>
+<th><strong>R</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>United Kingdom</td>
+<td>2021-10-01</td>
+<td>7841625</td>
+<td>34589</td>
+<td>34305.4</td>
+<td>333985.6</td>
+<td>1.0114</td>
+<td>1.114</td>
+</tr>
+<tr>
+<td>United Kingdom</td>
+<td>2021-10-02</td>
+<td>7871014</td>
+<td>29389</td>
+<td>34254.4</td>
+<td>337180.0</td>
+<td>1.0096</td>
+<td>1.096</td>
+</tr>
+</tbody>
+</table>
+
+<pre><code>ans = ... # Your answer as a DataFrame
+q = GRADER2b.fetch_question('q12')
+want = pandas.DataFrame(q.rows).assign(Date=lambda df: pandas.to_datetime(df.Date))
+submit = ans.merge(want)[q.cols].assign(Date=lambda df: df.Date.astype(str))
+GRADER2b.submit_answer(q, submit)</code></pre>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<p><strong>Question (q13).</strong> Plot $R$ against against the number of infected people per 100k, one point per day, one subplot per country,
+showing the UK, Germany, and the USA.
+Annotate your plot with <a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.axhline.html">axhline</a> to show $R=1$,
+and with <a href="https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.axhspan.html">axhspan</a>
+to show the range of $R$ values that are in between "infections double every two weeks" and "infections halve every two weeks", that is, between $\Delta=2^{1/14}$ and $\Delta=0.5^{1/14}$.</p>
+<p><em>You don't have to submit your plot to the autograder, but you <strong>must</strong> include it in your submitted notebook. Your plot should look something like this. In your plot, you should pay attention to (1) making sure the subplots share the same x-axis, (2) using a log x-axis, (3) colour-coding the points to indicate what's recent versus what's historic. Annotating your plot with notable events is optional. Don't worry about fine-grained control of the plot, such as plot size or colour scheme.</em></p>
+<p><img src="res/tick2_phase.svg" style="width:60em"/></p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<div style="width:100%; background-color:rgb(100,105,120); width:100%; height:.2em; margin-top:10em"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<h2 id="Appendix">Appendix<a class="anchor-link" href="#Appendix">&#182;</a></h2><h3 id="Fetching-the-data">Fetching the data<a class="anchor-link" href="#Fetching-the-data">&#182;</a></h3><p>Vaccination data is from <a href="https://coronavirus.data.gov.uk/details/download">coronavirus.data.gov.uk</a>. Choose Area type: Nation,
+select the metric cumPeopleVaccinatedSecondDoseByVaccinationDate, and download a csv.</p>
+<p>COVID data and country data is from a Johns Hopkins university <a href="https://github.com/CSSEGISandData/COVID-19">github repository</a>. For more about the dataset, 
+please see <a href="https://doi.org/10.1016/S1473-3099(20"><em>An interactive web-based dashboard to track COVID-19 in real time</em></a>30120-1) by Dong, Du, and Gardner, The Lancet, May 2020.</p>
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<div class="highlight"><pre><span></span><span class="n">BASE_URL</span> <span class="o">=</span> <span class="s1">&#39;https://raw.githubusercontent.com/CSSEGISandData/COVID-19/master/csse_covid_19_data&#39;</span>
+<span class="n">confirmed</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s1">/csse_covid_19_time_series/time_series_covid19_confirmed_global.csv&#39;</span><span class="p">)</span>
+<span class="n">deaths</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s1">/csse_covid_19_time_series/time_series_covid19_deaths_global.csv&#39;</span><span class="p">)</span>
+<span class="n">recovered</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s1">/csse_covid_19_time_series/time_series_covid19_recovered_global.csv&#39;</span><span class="p">)</span>
+<span class="n">countries</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">BASE_URL</span><span class="si">}</span><span class="s1">/UID_ISO_FIPS_LookUp_Table.csv&#39;</span><span class="p">)</span>
+
+<span class="n">id_vars</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Province/State&#39;</span><span class="p">,</span><span class="s1">&#39;Country/Region&#39;</span><span class="p">,</span><span class="s1">&#39;Lat&#39;</span><span class="p">,</span><span class="s1">&#39;Long&#39;</span><span class="p">]</span>
+<span class="n">x1</span> <span class="o">=</span> <span class="n">confirmed</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">id_vars</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;Confirmed&#39;</span><span class="p">)</span>
+<span class="n">x2</span> <span class="o">=</span> <span class="n">deaths</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">id_vars</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;Deaths&#39;</span><span class="p">)</span>
+<span class="n">x3</span> <span class="o">=</span> <span class="n">recovered</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">id_vars</span><span class="p">,</span> <span class="n">var_name</span><span class="o">=</span><span class="s1">&#39;Date&#39;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s1">&#39;Recovered&#39;</span><span class="p">)</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="s1">&#39;1:1&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">id_vars</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">])</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x3</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;outer&#39;</span><span class="p">,</span> <span class="n">validate</span><span class="o">=</span><span class="s1">&#39;1:1&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">id_vars</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;Date&#39;</span><span class="p">])</span>
+<span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;Confirmed&#39;</span><span class="p">,</span><span class="s1">&#39;Deaths&#39;</span><span class="p">,</span><span class="s1">&#39;Recovered&#39;</span><span class="p">]:</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span> <span class="o">=</span> <span class="n">x</span><span class="p">[</span><span class="n">v</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="n">covid</span> <span class="o">=</span> <span class="n">x</span>
+
+<span class="n">covid</span> <span class="o">=</span> <span class="n">covid</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">countries</span><span class="p">[[</span><span class="s1">&#39;Country_Region&#39;</span><span class="p">,</span><span class="s1">&#39;Province_State&#39;</span><span class="p">,</span><span class="s1">&#39;Population&#39;</span><span class="p">,</span><span class="s1">&#39;iso3&#39;</span><span class="p">]],</span>
+                    <span class="n">left_on</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Country/Region&#39;</span><span class="p">,</span><span class="s1">&#39;Province/State&#39;</span><span class="p">],</span>
+                    <span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Country_Region&#39;</span><span class="p">,</span> <span class="s1">&#39;Province_State&#39;</span><span class="p">],</span>
+                    <span class="n">how</span> <span class="o">=</span> <span class="s1">&#39;left&#39;</span><span class="p">)</span>
+
+<span class="n">covid</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;Country_Region&#39;</span><span class="p">,</span> <span class="s1">&#39;Province_State&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">covid</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="s1">&#39;covid_global_latest.csv&#39;</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 
 </div>
