@@ -14461,7 +14461,7 @@ GRADER2a.submit_answer(q, {'num_rows': len(covidc), 'details': submit})</code></
 q = GRADER2a.fetch_question('q6')
 dates = pandas.to_datetime(q.dates)
 submit = ukc.loc[ukc.Date.isin(dates), q.cols].assign(Date=lambda df: df.Date.astype(str))
-GRADER2a.submit_answer(q, {'num_rows': len(c), 'details': submit})</code></pre>
+GRADER2a.submit_answer(q, {'num_rows': len(ukc), 'details': submit})</code></pre>
 
 </div>
 </div>
