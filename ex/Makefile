@@ -1,5 +1,5 @@
 CONVERT = jupyter nbconvert --to html
-SRCS1 = $(wildcard ex*.ipynb)
+SRCS1 = $(wildcard ex*.ipynb) climate.ipynb
 
 %.html: %.ipynb
 	$(CONVERT) $*
