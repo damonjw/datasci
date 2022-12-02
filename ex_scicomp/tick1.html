@@ -14272,33 +14272,47 @@ $$
 G = 2\frac{\sum_{i=1}^N i\, w_{(i)}}{N \sum_i w_{(i)}} - \Big(1 + \frac{1}{N}\Bigr)
 $$
 where $w_{(1)}$ is the smallest value, $w_{(2)}$ the second smallest etc. If everyone has the same wealth then $G=0$; if one person has all the wealth then $G=1-1/N$.</p>
-<blockquote><p><em><strong>Extension.</strong> In the kinetic exchange model, the poorest and the richest might swap places after just one transaction, which isn't very likely.
+
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<blockquote><p><em><strong>Extension.</strong> In the kinetic exchange model, the poorest and the richest might swap places after just one transaction, 
+which isn't a great fit for real economics.
 There's an alternative model for exchange, that will be used in Tick 3, which we might call the "Value Transfer Model".
-As before, suppose that two individuals with wealth $v$ and $w$ respectively are paired, but now let their wealth be updated by
+As before, suppose that two individuals with wealth $v$ and $w$ respectively are paired, but now let their wealth be updated by</em>
 $$
-v</em>{\text{new}} = v + R \min(v,w),
+v_{\text{new}} = v + R \min(v,w),
 \quad
-w<em>{\text{new}} = w - R \min(v,w)
+w_{\text{new}} = w - R \min(v,w)
 $$
-where $R$ is now a random number in $[-1,1]$, chosen independently for every pair at every timestep. The idea is that each party to the exchange puts up a certain amount of money, but no more than they can afford.</em></p>
+<em>where $R$ is now a random number in $[-1,1]$, chosen independently for every pair at every timestep. The idea is that each party to the exchange puts up a certain amount of money, but no more than they can afford.</em></p>
 </blockquote>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
+<div style="height:3em;"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Questions">Questions<a class="anchor-link" href="#Questions">&#182;</a></h2><p>Use these autograder settings:</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ucamcl</span>
-<span class="n">GRADER</span> <span class="o">=</span> <span class="n">ucamcl</span><span class="o">.</span><span class="n">autograder</span><span class="p">(</span><span class="s1">&#39;https://markmy.solutions&#39;</span><span class="p">,</span> <span class="n">course</span><span class="o">=</span><span class="s1">&#39;scicomp_2022&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick1&#39;</span><span class="p">)</span>
-</pre></div>
+
+<pre><code>import ucamcl
+GRADER = ucamcl.autograder('https://markmy.solutions', course='scicomp_2022').subsection('tick1')</code></pre>
 <div class="alert alert-warning">This assignment tests your vectorized thinking. You will be asked to run simulations on a population of hundreds of thousands of individuals, over many timesteps. <strong>YOUR CODE MUST USE NUMPY VECTORIZED OPERATIONS</strong> rather than iterating over the population. You may use Python iteration over timesteps.
     </div>
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div style="margin-top: 3em;"/>
-
+<div style="height:3em;"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 1.</strong> The model needs us to randomly group the population into $N/2$ pairs. 
 We can do this by randomly permuting the vector $[0,...,N-1]$, letting the vector <code>m1</code> consist of the first $N/2$ integers and <code>m2</code> consist of the rest, and interpreting it as "<code>m1[i]</code> is paired with <code>m2[i]</code>".</p>
 <p>Write a function <code>pairs(N)</code> that returns a tuple <code>(m1,m2)</code> where <code>m1</code> and <code>m2</code> are both vectors of length $N/2$ as described above. For example, if you run <code>pairs(6)</code>, you might get the output</p>
@@ -14315,8 +14329,11 @@ GRADER.submit_answer(q, ans)</code></pre>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div style="margin-top: 3em;"/>
-
+<div style="height:3em;"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 2.</strong> Write a function <code>kinetic_exchange(v,w)</code> which takes two wealth vectors <code>v</code> and <code>w</code>, each of length $N/2$, and returns a tuple <code>(vnew, wnew)</code> with two new vectors, according to the kinetic exchange model. To submit your answer,</p>
 
 <pre><code>q = GRADER.fetch_question('q2')
@@ -14329,8 +14346,11 @@ GRADER.submit_answer(q, ans)</code></pre>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div style="margin-top: 3em;"/>
-
+<div style="height:3em;"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 3.</strong> Write a function <code>gini(w)</code> which takes a vector <code>w</code> and returns the Gini coefficient. To submit your answer,</p>
 
 <pre><code>q = GRADER.fetch_question('q3')
@@ -14342,8 +14362,11 @@ GRADER.submit_answer(q, {'g': g})</code></pre>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div style="margin-top: 3em;"/>
-
+<div style="height:3em;"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 4.</strong> Write a function <code>sim(N, T)</code> which runs the kinetic exchange model on a population of $N$ individuals for $T$ timesteps. It should return a pair <code>(w, gs)</code> where <code>w</code> is the wealth vector after $T$ timesteps, and <code>gs</code> is a length $T$ vector where <code>gs[i]</code> is the Gini coefficient at timestep $i$. To submit your answer,</p>
 
 <pre><code>q = GRADER.fetch_question('q4')
@@ -14355,8 +14378,11 @@ GRADER.submit_answer(q, ans)</code></pre>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<div style="margin-top: 3em;"/>
-
+<div style="height:3em;"></div>
+</div>
+</div>
+<div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 5.</strong> Simulate a population of 500,000 over 30 iterations. Plot the Gini coefficient as a function of timestep.
 To be precise, if $w_t$ is the wealth vector after $t$ timesteps then you should plot $\textsf{gini}(w_t)$ on the $y$-axis and $t$ on the $x$-axis.</p>
 <p>Your plot should look something like this. If it doesn't, there's likely a big which will hinder you in later questions.
