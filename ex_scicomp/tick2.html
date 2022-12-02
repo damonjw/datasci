@@ -14275,30 +14275,30 @@ $$
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Questions">Questions<a class="anchor-link" href="#Questions">&#182;</a></h2><p>Use these autograder settings:</p>
-<div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ucamcl</span>
-<span class="n">GRADER</span> <span class="o">=</span> <span class="n">ucamcl</span><span class="o">.</span><span class="n">autograder</span><span class="p">(</span><span class="s1">&#39;https://markmy.solutions&#39;</span><span class="p">,</span> <span class="n">course</span><span class="o">=</span><span class="s1">&#39;scicomp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick2_2022&#39;</span><span class="p">)</span>
-</pre></div>
-<div class="alert alert-warning">This assignment tests your vectorized thinking. You will be asked to run simulations on a population of hundreds of thousands of individuals, over many timesteps. <strong>YOUR CODE MUST USE NUMPY VECTORIZED OPERATIONS</strong> rather than iterating over the population. You may use Python iteration over timesteps.
+
+<pre><code>import ucamcl
+GRADER = ucamcl.autograder('https://markmy.solutions', course='scicomp_2022').subsection('tick2')</code></pre>
+<div class="alert alert-warning" style="margin-bottom:3em;">This assignment tests your vectorized thinking. You will be asked to run simulations on a population of hundreds of thousands of individuals, over many timesteps. <strong>YOUR CODE MUST USE NUMPY VECTORIZED OPERATIONS</strong> rather than iterating over the population. You may use Python iteration over timesteps.
     </div>
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 6.</strong> In a perfectly mobile economy, where everyone has equal chance of reaching any quintile, what fraction of people are expected to move by more than one quintile?</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q6&#39;</span><span class="p">)</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">your_answer</span><span class="p">)</span>
-</pre></div>
+
+<pre><code>q = GRADER.fetch_question('q6')
+GRADER.submit_answer(q, your_answer)</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 7.</strong> Write a function <code>mobility(v,w)</code> that returns the proportion of people who moved by more than one quintile, where <code>v[i]</code> and <code>w[i]</code> measure respectively the wealth of individual $i$ at the beginning and end of a time period. <em>Hint: look up <a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.percentile.html#numpy.percentile"><code>np.percentile</code></a> and <a href="https://docs.scipy.org/doc/numpy/reference/generated/numpy.digitize.html"><code>np.digitize</code></a>.</em></p>
-<div class="highlight"><pre><span></span><span class="c1"># Submitting your answer:</span>
-<span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q7&#39;</span><span class="p">)</span>
-<span class="n">v</span><span class="p">,</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">**</span><span class="n">q</span><span class="o">.</span><span class="n">a</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">**</span><span class="n">q</span><span class="o">.</span><span class="n">a</span> <span class="o">*</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">random</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">mobility</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">))</span>
-</pre></div>
+
+<pre><code># Submitting your answer:
+q = GRADER.fetch_question('q7')
+v,w = np.arange(q.n)**q.a, np.arange(q.n)**q.a * np.random.random(q.n)
+GRADER.submit_answer(q, mobility(v,w))</code></pre>
 
 </div>
 </div>
@@ -14306,11 +14306,11 @@ $$
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 8.</strong> Simulate the kinetic exchange model from Tick 1 long enough for it to stabilize; call this time $T$, and let the wealth vector be $w_T$. Run the model $t$ timesteps further to time $T+t$, find the wealth vector $w_{T+t}$, and compute $\textsf{mobility}(w_T, w_{T+t})$. It's up to you to decide how to judge stabilization; you don't have to explain your method but you do have to submit a correct answer.</p>
 <p><img src="res/2mobility.svg" style="height:9em"/></p>
-<div class="highlight"><pre><span></span><span class="c1"># Submitting your answer:</span>
-<span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q8&#39;</span><span class="p">)</span>
-<span class="c1"># For a population size q.n, measure mobility over from time T to time T+q.t</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">your_answer</span><span class="p">)</span>
-</pre></div>
+
+<pre><code># Submitting your answer:
+q = GRADER.fetch_question('q8')
+# For a population size q.n, measure mobility over from time T to time T+q.t
+GRADER.submit_answer(q, your_answer)</code></pre>
 
 </div>
 </div>

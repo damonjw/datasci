@@ -14289,9 +14289,9 @@ where $R$ is now a random number in $[-1,1]$, chosen independently for every pai
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <h2 id="Questions">Questions<a class="anchor-link" href="#Questions">&#182;</a></h2><p>Use these autograder settings:</p>
 <div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">ucamcl</span>
-<span class="n">GRADER</span> <span class="o">=</span> <span class="n">ucamcl</span><span class="o">.</span><span class="n">autograder</span><span class="p">(</span><span class="s1">&#39;https://markmy.solutions&#39;</span><span class="p">,</span> <span class="n">course</span><span class="o">=</span><span class="s1">&#39;scicomp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick1_2022&#39;</span><span class="p">)</span>
+<span class="n">GRADER</span> <span class="o">=</span> <span class="n">ucamcl</span><span class="o">.</span><span class="n">autograder</span><span class="p">(</span><span class="s1">&#39;https://markmy.solutions&#39;</span><span class="p">,</span> <span class="n">course</span><span class="o">=</span><span class="s1">&#39;scicomp_2022&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">subsection</span><span class="p">(</span><span class="s1">&#39;tick1&#39;</span><span class="p">)</span>
 </pre></div>
-<div class="alert alert-warning">This assignment tests your vectorized thinking. You will be asked to run simulations on a population of hundreds of thousands of individuals, over many timesteps. <strong>YOUR CODE MUST USE NUMPY VECTORIZED OPERATIONS</strong> rather than iterating over the population. You may use Python iteration over timesteps.
+<div class="alert alert-warning" style="margin-bottom:3em">This assignment tests your vectorized thinking. You will be asked to run simulations on a population of hundreds of thousands of individuals, over many timesteps. <strong>YOUR CODE MUST USE NUMPY VECTORIZED OPERATIONS</strong> rather than iterating over the population. You may use Python iteration over timesteps.
     </div>
 </div>
 </div>
@@ -14300,48 +14300,48 @@ where $R$ is now a random number in $[-1,1]$, chosen independently for every pai
 <p><strong>Question 1.</strong> The model needs us to randomly group the population into $N/2$ pairs. 
 We can do this by randomly permuting the vector $[0,...,N-1]$, letting the vector <code>m1</code> consist of the first $N/2$ integers and <code>m2</code> consist of the rest, and interpreting it as "<code>m1[i]</code> is paired with <code>m2[i]</code>".</p>
 <p>Write a function <code>pairs(N)</code> that returns a tuple <code>(m1,m2)</code> where <code>m1</code> and <code>m2</code> are both vectors of length $N/2$ as described above. For example, if you run <code>pairs(6)</code>, you might get the output</p>
-<div class="highlight"><pre><span></span><span class="p">(</span><span class="n">array</span><span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]),</span> <span class="n">array</span><span class="p">([</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">]))</span>
-</pre></div>
+
+<pre><code>(array[3, 0, 1]), array([2, 4, 5]))</code></pre>
 <p>To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q1&#39;</span><span class="p">)</span>
-<span class="n">m1</span><span class="p">,</span><span class="n">m2</span> <span class="o">=</span> <span class="n">pairs</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;n&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">([</span><span class="n">m1</span><span class="p">,</span><span class="n">m2</span><span class="p">]))),</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">m1</span><span class="o">-</span><span class="n">m2</span><span class="p">))}</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
+
+<pre><code>q = GRADER.fetch_question('q1')
+m1,m2 = pairs(q.n)
+ans = {'n': len(np.unique(np.concatenate([m1,m2]))), 's': np.std(np.abs(m1-m2))}
+GRADER.submit_answer(q, ans)</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 2.</strong> Write a function <code>kinetic_exchange(v,w)</code> which takes two wealth vectors <code>v</code> and <code>w</code>, each of length $N/2$, and returns a tuple <code>(vnew, wnew)</code> with two new vectors, according to the kinetic exchange model. To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q2&#39;</span><span class="p">)</span>
-<span class="n">v</span><span class="p">,</span><span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">**</span><span class="n">q</span><span class="o">.</span><span class="n">p</span>
-<span class="n">vnew</span><span class="p">,</span><span class="n">wnew</span> <span class="o">=</span> <span class="n">kinetic_exchange</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="n">w</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;m1&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">vnew</span><span class="p">),</span> <span class="s1">&#39;s2&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">wnew</span><span class="p">)}</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
+
+<pre><code>q = GRADER.fetch_question('q2')
+v,w = np.linspace(1,5,q.n), np.linspace(1,2,q.n)**q.p
+vnew,wnew = kinetic_exchange(v,w)
+ans = {'m1': np.mean(vnew), 's2': np.std(wnew)}
+GRADER.submit_answer(q, ans)</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 3.</strong> Write a function <code>gini(w)</code> which takes a vector <code>w</code> and returns the Gini coefficient. To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q3&#39;</span><span class="p">)</span>
-<span class="n">w</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">)</span><span class="o">**</span><span class="n">q</span><span class="o">.</span><span class="n">p</span>
-<span class="n">g</span> <span class="o">=</span> <span class="n">gini</span><span class="p">(</span><span class="n">w</span><span class="p">)</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;g&#39;</span><span class="p">:</span> <span class="n">g</span><span class="p">})</span>
-</pre></div>
+
+<pre><code>q = GRADER.fetch_question('q3')
+w = np.linspace(0,1,q.n)**q.p
+g = gini(w)
+GRADER.submit_answer(q, {'g': g})</code></pre>
 
 </div>
 </div>
 <div class="jp-Cell-inputWrapper"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
 <p><strong>Question 4.</strong> Write a function <code>sim(N, T)</code> which runs the kinetic exchange model on a population of $N$ individuals for $T$ timesteps. It should return a pair <code>(w, gs)</code> where <code>w</code> is the wealth vector after $T$ timesteps, and <code>gs</code> is a length $T$ vector where <code>gs[i]</code> is the Gini coefficient at timestep $i$. To submit your answer,</p>
-<div class="highlight"><pre><span></span><span class="n">q</span> <span class="o">=</span> <span class="n">GRADER</span><span class="o">.</span><span class="n">fetch_question</span><span class="p">(</span><span class="s1">&#39;q4&#39;</span><span class="p">)</span>
-<span class="n">w</span><span class="p">,</span><span class="n">gs</span> <span class="o">=</span> <span class="n">sim</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">n</span><span class="p">,</span> <span class="n">q</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
-<span class="n">ans</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;gm&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">t</span><span class="o">/</span><span class="mi">2</span><span class="p">):]),</span> <span class="s1">&#39;gs&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">gs</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">q</span><span class="o">.</span><span class="n">t</span><span class="o">/</span><span class="mi">2</span><span class="p">):]),</span> <span class="s1">&#39;ws&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">w</span><span class="p">)}</span>
-<span class="n">GRADER</span><span class="o">.</span><span class="n">submit_answer</span><span class="p">(</span><span class="n">q</span><span class="p">,</span> <span class="n">ans</span><span class="p">)</span>
-</pre></div>
+
+<pre><code>q = GRADER.fetch_question('q4')
+w,gs = sim(q.n, q.t)
+ans = {'gm': np.mean(gs[int(q.t/2):]), 'gs': np.std(gs[int(q.t/2):]), 'ws': np.std(w)}
+GRADER.submit_answer(q, ans)</code></pre>
 
 </div>
 </div>
