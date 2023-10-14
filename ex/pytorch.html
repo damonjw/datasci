@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>PyTorch introduction</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <link rel="stylesheet" href="pandoc.css" />
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">PyTorch introduction</h1>
+</header>
+<h1 id="getting-started-with-pytorch">Getting started with PyTorch</h1>
+<p>This is a brief introduction to PyTorch, designed to complement the
+IB Data Science course. It assumes you’re familiar with the idea of
+maximum likelihood estimation. We’ll use PyTorch to represent a
+probability model for regression, and fit it.</p>
+<p>There are many other tutorials on PyTorch, including <a
+href="https://pytorch.org/tutorials/beginner/basics/intro.html">the
+tutorial in the official documentation</a>. They typically present
+PyTorch as a software library, and go into much more depth on tensors
+and GPUs and so on. But they often don’t give much guidance on how to
+use PyTorch for data science.</p>
+<p>In this tutorial we’ll work with the data behind the <a
+href="https://xkcd.com/2048/">xkcd 2048 comic on curve-fitting</a>.
+First, load the dataset:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">&#39;https://www.cl.cam.ac.uk/teaching/current/DataSci/data/xkcd.csv&#39;</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>xkcd <span class="op">=</span> pandas.read_csv(url)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>ax.scatter(xkcd.x, xkcd.y)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div>
+<p><img src="res/pytorch_scatter.png" style="height: 15em"/></p>
+<h2 id="step-1.-fitting-with-scipy">Step 1. Fitting with scipy</h2>
+<p>Consider the probability model <span class="math display">\[
+Y_i \sim a + b x_i + c x_i^2 + N(0,\sigma^2).
+\]</span> We can fit this model to the dataset using maximum likelihood
+estimation. The fitted function <span
+class="math inline">\(\hat{a}+\hat{b}x+\hat{c}x^2\)</span> is shown
+below. The fitted standard deviation <span
+class="math inline">\(\hat{\sigma}\)</span> is also shown, by a ribbon
+extending above and below the fitted line by <span
+class="math inline">\(2\hat{\sigma}\)</span>.</p>
+<p><img src="res/pytorch_quadfit.png" style="height: 15em"/></p>
+<div class="question">
+<p><span class="title">EXERCISE 1.</span> Fit this model using
+<code>scipy.optimize.fmin</code>. You will need to implement a function
+that computes the log likelihood, call it
+<code>logPr(y, x,a,b,c,σ)</code>. To keep your code tidy, start by
+defining a helper function that computes the predicted value,</p>
+<pre><code>def μ(x, a,b,c): return a + b*x + c*x**2</code></pre>
+<p>Plot the fitted <code>μ</code> function, and add the ribbon using <a
+href="https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.fill_between.html"><code>fill_between</code></a>.</p>
+</div>
+<div>
+<input type="checkbox" id="c1"/><label for="c1">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> μ(x, a,b,c):</span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> a <span class="op">+</span> b<span class="op">*</span>x <span class="op">+</span> c<span class="op">*</span>x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> logPr(y, x,a,b,c,σ):</span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> np.<span class="bu">sum</span>(scipy.stats.norm.logpdf(y, loc<span class="op">=</span>μ(x,a,b,c), scale<span class="op">=</span>np.sqrt(σ<span class="op">**</span><span class="dv">2</span>)))</span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>ahat,bhat,chat,σhat <span class="op">=</span> scipy.optimize.fmin(<span class="kw">lambda</span> θ: <span class="op">-</span>logPr(xkcd.y, xkcd.x, <span class="op">*</span>θ), [<span class="dv">1</span>,<span class="dv">1</span>,<span class="dv">0</span>,<span class="dv">1</span>])</span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Expected answer for log likelihood: -61.575367</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>ax.scatter(xkcd.x, xkcd.y)</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>xnew <span class="op">=</span> np.linspace(<span class="dv">0</span>,<span class="dv">10</span>,<span class="dv">100</span>)</span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>ynew <span class="op">=</span> μ(xnew, ahat, bhat, chat)</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>ax.plot(xnew, ynew, color<span class="op">=</span><span class="st">&#39;black&#39;</span>)</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xnew, ynew<span class="op">-</span><span class="dv">2</span><span class="op">*</span>σhat, ynew<span class="op">+</span><span class="dv">2</span><span class="op">*</span>σhat, color<span class="op">=</span><span class="st">&#39;steelblue&#39;</span>, alpha<span class="op">=</span><span class="fl">.6</span>)</span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div>
+</div>
+</div>
+<h2 id="step-2.-defining-functions-in-pytorch">Step 2. Defining
+functions in PyTorch</h2>
+<p>To fit our probability model, we have to maximize the log likelihood
+function, <span class="math display">\[
+\log\operatorname{Pr}(y;x,a,b,c,\sigma).
+\]</span> Here, <span class="math inline">\(x\)</span> and <span
+class="math inline">\(y\)</span> are the data that we’re given (both of
+them numpy vectors of 31 elements), and the other four parameters are
+unknowns that we want to maximize over.</p>
+<p>In PyTorch, we define a function with unknown parameters by creating
+a class that inherits from <code>torch.nn.Module</code>. Declare any
+unknowns in the constructor, wrapping them in
+<code>torch.nn.Parameter</code> to tell PyTorch that they are to be
+optimized over. Also, define a <code>forward</code> method that does the
+work of actually computing the value of the function; this will be
+invoked automatically when we call our function object. Here’s an
+example:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> MyFunction(nn.Module):</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.θ <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> (x <span class="op">-</span> <span class="va">self</span>.θ) <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> MyFunction()</span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>f(torch.tensor(<span class="fl">3.1</span>))</span></code></pre></div>
+<p>Anything numerical we do in PyTorch, we do on
+<code>torch.tensor</code> objects. These are similar to numpy arrays;
+there are tensor methods that mimic many of the numpy array methods; and
+simple Python arithmetical operations like <code>-</code> and
+<code>**</code> are overridden to work on tensors. When we implement a
+function using only tensor operations, then PyTorch can automatically
+compute the derivative of our function, and this is what allows it to do
+efficient optimization using gradient descent.</p>
+<div class="question">
+<p><span class="title">EXERCISE 2.</span> Reimplement your
+<code>logPr</code> function as a PyTorch Module. It should have a
+<code>forward(self,y,x)</code> method. Note that <code>x</code> and
+<code>y</code> will need to be tensors; to convert from numpy arrays
+use</p>
+<pre><code>x = torch.tensor(xkcd.x, dtype=torch.float)
+y = torch.tensor(xkcd.y, dtype=torch.float)</code></pre>
+</div>
+<div>
+<input type="checkbox" id="c2"/><label for="c2">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LogPr(nn.Module):</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">0.0</span>))</span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.σ <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> μ(<span class="va">self</span>, x):</span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.a <span class="op">+</span> <span class="va">self</span>.b <span class="op">*</span> x <span class="op">+</span> <span class="va">self</span>.c <span class="op">*</span> x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, y, x):</span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true" tabindex="-1"></a>        σ<span class="dv">2</span> <span class="op">=</span> <span class="va">self</span>.σ <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.<span class="bu">sum</span>(<span class="op">-</span> <span class="fl">0.5</span><span class="op">*</span>torch.log(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>σ<span class="dv">2</span>) <span class="op">-</span> torch.<span class="bu">pow</span>(y <span class="op">-</span> <span class="va">self</span>.μ(x), <span class="dv">2</span>) <span class="op">/</span> (<span class="dv">2</span><span class="op">*</span>σ<span class="dv">2</span>))</span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(xkcd.x, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(xkcd.y, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true" tabindex="-1"></a>logPr <span class="op">=</span> LogPr()</span>
+<span id="cb6-20"><a href="#cb6-20" aria-hidden="true" tabindex="-1"></a>logPr(y, x)</span>
+<span id="cb6-21"><a href="#cb6-21" aria-hidden="true" tabindex="-1"></a><span class="co"># expected output: tensor(-185.3153, grad_fn=&lt;SumBackward0&gt;)</span></span></code></pre></div>
+</div>
+</div>
+<h2 id="step-3.-optimization-in-pytorch">Step 3. Optimization in
+PyTorch</h2>
+<p>PyTorch is, at its core, a library to make it easy to minimize
+complicated functions using gradient descent.</p>
+<ul>
+<li>We define a function (involving parameters to be optimized
+over),</li>
+<li>we create an <code>optimizer</code> object that knows about these
+parameters,</li>
+<li>then we repeatedly compute gradients with respect to these
+parameters and take a step in the direction of steepest descent. (There
+are several different optimizers that use different strategies for
+choosing step size; the Adam optimizer, used in the code below, is good
+for neural networks, and a bit crummy for simple optimizations like this
+one!)</li>
+</ul>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> MyFunction()</span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(f.parameters())</span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">5000</span>):  <span class="co"># number of gradient-descent steps</span></span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    val <span class="op">=</span> f(torch.tensor(<span class="fl">3.0</span>))</span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    val.backward()         <span class="co"># compute the gradient </span></span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(f.θ)</span></code></pre></div>
+<div class="question">
+<p><span class="title">EXERCISE 3.</span> Repeat the optimization from
+exercise 1, but using PyTorch. You should be able to get a good answer
+within 10,000 iterations (!).</p>
+</div>
+<div>
+<input type="checkbox" id="c3"/><label for="c3">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> LogPr(nn.Module):</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>   <span class="co"># as for Exercise 2</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(xkcd.x, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(xkcd.y, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>logPr <span class="op">=</span> LogPr()</span>
+<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(logPr.parameters())</span>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    loglik <span class="op">=</span> logPr(y, x)</span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span>loglik).backward() <span class="co"># we want to maximize logPr, i.e. minimize -loglik</span></span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(logPr(y,x))</span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a><span class="co"># expected output: tensor(-61.5762, grad_fn=&lt;SumBackward0&gt;)</span></span></code></pre></div>
+</div>
+</div>
+<h2 id="step-4.-nested-modules">Step 4. Nested modules</h2>
+<p>To keep ourselves (reasonably) sane, it can be useful to split a
+Module into building blocks. If we define a module <span
+class="math inline">\(A\)</span>, then define another module <span
+class="math inline">\(B\)</span> which uses it, as in the code below,
+then when we optimize over <span class="math inline">\(B\)</span>’s
+unknown parameters it will automatically include <span
+class="math inline">\(A\)</span>’s unknown parameters in the
+optimization.</p>
+<pre><code>class A(nn.Module):
+    ...
+
+class B(nn.Module):
+    def __init__(self):
+        self.a = A()</code></pre>
+<div class="question">
+<p><span class="title">EXERCISE 4.</span> Refactor the code from
+exercises 2 and 3 as follows: create a <code>QuadraticCurve</code>
+module to implement the function <span class="math inline">\(μ(x)=a+bx+c
+x^2\)</span>, and a second module called <code>RQuadratic</code> which
+represents a collection of independent Normal random variables <span
+class="math inline">\(N(\mu(x_i),\sigma^2)\)</span>. Here is a
+skeleton.</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> QuadraticCurve(nn.Module):</span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return a + b*x + c*x^2, where x is a tensor of real values</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RQuadratic(nn.Module):</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.μ <span class="op">=</span> QuadraticCurve()</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> logPr(<span class="va">self</span>, y, x):</span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>        <span class="co"># return the log likelihood of [y0,...,yn]</span></span></code></pre></div>
+</div>
+<div>
+<input type="checkbox" id="c4"/><label for="c4">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> QuadraticCurve(nn.Module):</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.a <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.b <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.c <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">0.0</span>))</span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> forward(<span class="va">self</span>, x):</span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> <span class="va">self</span>.a <span class="op">+</span> <span class="va">self</span>.b <span class="op">*</span> x <span class="op">+</span> <span class="va">self</span>.c <span class="op">*</span> x<span class="op">**</span><span class="dv">2</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RQuadratic(nn.Module):</span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb11-16"><a href="#cb11-16" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.μ <span class="op">=</span> QuadraticCurve()</span>
+<span id="cb11-17"><a href="#cb11-17" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.σ <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb11-18"><a href="#cb11-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> logPr(<span class="va">self</span>, y, x):</span>
+<span id="cb11-19"><a href="#cb11-19" aria-hidden="true" tabindex="-1"></a>        σ<span class="dv">2</span> <span class="op">=</span> <span class="va">self</span>.σ <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb11-20"><a href="#cb11-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.<span class="bu">sum</span>(<span class="op">-</span> <span class="fl">0.5</span><span class="op">*</span>torch.log(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>σ<span class="dv">2</span>) <span class="op">-</span> torch.<span class="bu">pow</span>(y <span class="op">-</span> <span class="va">self</span>.μ(x), <span class="dv">2</span>) <span class="op">/</span> (<span class="dv">2</span><span class="op">*</span>σ<span class="dv">2</span>))</span>
+<span id="cb11-21"><a href="#cb11-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-22"><a href="#cb11-22" aria-hidden="true" tabindex="-1"></a>x,y <span class="op">=</span> torch.tensor(xkcd.x, dtype<span class="op">=</span>torch.<span class="bu">float</span>), torch.tensor(xkcd.y, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb11-23"><a href="#cb11-23" aria-hidden="true" tabindex="-1"></a>mymodel <span class="op">=</span> RQuadratic()</span>
+<span id="cb11-24"><a href="#cb11-24" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(mymodel.parameters())</span>
+<span id="cb11-25"><a href="#cb11-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-26"><a href="#cb11-26" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> epoch <span class="kw">in</span> <span class="bu">range</span>(<span class="dv">10000</span>):</span>
+<span id="cb11-27"><a href="#cb11-27" aria-hidden="true" tabindex="-1"></a>    optimizer.zero_grad()</span>
+<span id="cb11-28"><a href="#cb11-28" aria-hidden="true" tabindex="-1"></a>    loglik <span class="op">=</span> mymodel.logPr(y, x)</span>
+<span id="cb11-29"><a href="#cb11-29" aria-hidden="true" tabindex="-1"></a>    (<span class="op">-</span>loglik).backward()</span>
+<span id="cb11-30"><a href="#cb11-30" aria-hidden="true" tabindex="-1"></a>    optimizer.step()</span>
+<span id="cb11-31"><a href="#cb11-31" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-32"><a href="#cb11-32" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(loglik)</span>
+<span id="cb11-33"><a href="#cb11-33" aria-hidden="true" tabindex="-1"></a><span class="co"># Should give same answer as before, tensor(-61.5762, grad_fn=&lt;SumBackward0&gt;)</span></span></code></pre></div>
+</div>
+</div>
+<h2 id="step-5.-getting-answers-out-of-pytorch">Step 5. Getting answers
+out of PyTorch</h2>
+<p>The magic of PyTorch is that it remembers all the mathematical
+operations you’ve performed and stores them in a computation graph, in
+order to be able to compute the derivative. When we just want to pull
+some values out of PyTorch for plotting, we need to tell to ignore all
+this cleverness.</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>f <span class="op">=</span> MyFunction()</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract a scalar value, and get a Python object</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>f.θ.item()</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Extract a tensor, and get a numpy array</span></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> f(torch.tensor([<span class="fl">1.0</span>,<span class="fl">2.0</span>]))</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>y.detach().numpy()</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Tell it not to bother storing the computation graph</span></span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a><span class="co"># (saves time, if we&#39;re not going to need the derivative)</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>    x <span class="op">=</span> torch.tensor([<span class="fl">1.0</span>, <span class="fl">2.0</span>])</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>    y <span class="op">=</span> f(x)</span></code></pre></div>
+<div class="question">
+<p><span class="title">EXERCISE 5.</span> Generate the plot from
+exercise 1, but showing the output of your PyTorch optimization from
+exercise 4.</p>
+</div>
+<div>
+<input type="checkbox" id="c5"/><label for="c5">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>xnew <span class="op">=</span> torch.linspace(<span class="dv">0</span>,<span class="dv">10</span>,<span class="dv">100</span>)</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> torch.no_grad():</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    ynew <span class="op">=</span> logPr.μ(xnew)</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>xnew <span class="op">=</span> xnew.detach().numpy()</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>ynew <span class="op">=</span> ynew.detach().numpy()</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>σhat <span class="op">=</span> logPr.σ.item()</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>ax.scatter(xkcd.x, xkcd.y)</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>ax.plot(xnew, ynew, color<span class="op">=</span><span class="st">&#39;black&#39;</span>)</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>ax.fill_between(xnew, ynew<span class="op">-</span><span class="dv">2</span><span class="op">*</span>σhat, ynew<span class="op">+</span><span class="dv">2</span><span class="op">*</span>σhat, color<span class="op">=</span><span class="st">&#39;steelblue&#39;</span>, alpha<span class="op">=</span><span class="fl">.6</span>)</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div>
+</div>
+</div>
+<h2 id="step-6.-making-it-interactive">Step 6. Making it
+interactive</h2>
+<p>When we optimize a function using gradient descent, how many
+iterations should we use? It’s hard to know, when we’re just starting
+out with a new model and we have no experience, and we’re still
+experimenting. I like to run my optimizations interactively, in an
+infinite loop, showing the fit every few iterations. Every so often I
+interrupt, explore the plots in more detail, then resume.</p>
+<p>I’ve written a piece of magic Python code to help with this, a class
+called <a href="interruptable.py"><code>Interruptable</code></a>. Use it
+as follows. In Jupyter, we can interrupt the <code>while</code> loop
+using the menu option Kernel | Interrupt, or by the keyboard shortcut
+<span style="font-family:serif">Esc I I</span>. We can resume by
+rerunning the cell <code>with Interruptable()...</code>. (Put it in a
+cell on its own, so we don’t reset the epoch counter when we
+resume.)</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> IPython</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>epoch <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> Interruptable() <span class="im">as</span> check_interrupted:</span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>        check_interrupted()</span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>        ... <span class="co"># do some stuff</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">200</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a>            IPython.display.clear_output(wait<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>            ... <span class="co"># print output</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>        epoch <span class="op">+=</span> <span class="dv">1</span></span></code></pre></div>
+<p>This code also uses
+<code>IPython.display.clear_output(wait=True)</code>, to make Jupyter
+overwrite its output rather than appending.</p>
+<div class="question">
+<p><span class="title">EXERCISE 6.</span> Rerun the optimization as an
+interruptable infinite loop. Every few hundred epochs, plot the fit.</p>
+</div>
+<div>
+<input type="checkbox" id="c6"/><label for="c6">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(xkcd.x, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(xkcd.y, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>mymodel <span class="op">=</span> RQuadratic()  <span class="co"># defined in Exercise 5</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>epoch <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-6"><a href="#cb15-6" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(mymodel.parameters())</span>
+<span id="cb15-7"><a href="#cb15-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-8"><a href="#cb15-8" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_quadratic(mymodel):</span>
+<span id="cb15-9"><a href="#cb15-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb15-10"><a href="#cb15-10" aria-hidden="true" tabindex="-1"></a>        xnew <span class="op">=</span> torch.linspace(<span class="dv">0</span>,<span class="dv">10</span>,<span class="dv">100</span>)</span>
+<span id="cb15-11"><a href="#cb15-11" aria-hidden="true" tabindex="-1"></a>        ynew <span class="op">=</span> mymodel.μ(xnew)</span>
+<span id="cb15-12"><a href="#cb15-12" aria-hidden="true" tabindex="-1"></a>        xnew <span class="op">=</span> xnew.detach().numpy()</span>
+<span id="cb15-13"><a href="#cb15-13" aria-hidden="true" tabindex="-1"></a>        ynew <span class="op">=</span> ynew.detach().numpy()</span>
+<span id="cb15-14"><a href="#cb15-14" aria-hidden="true" tabindex="-1"></a>        σ <span class="op">=</span> mymodel.σ.item()</span>
+<span id="cb15-15"><a href="#cb15-15" aria-hidden="true" tabindex="-1"></a>    fig,ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb15-16"><a href="#cb15-16" aria-hidden="true" tabindex="-1"></a>    ax.fill_between(xnew, ynew<span class="op">-</span><span class="dv">2</span><span class="op">*</span>σ, ynew<span class="op">+</span><span class="dv">2</span><span class="op">*</span>σ, color<span class="op">=</span><span class="st">&#39;steelblue&#39;</span>, alpha<span class="op">=</span><span class="fl">.6</span>)</span>
+<span id="cb15-17"><a href="#cb15-17" aria-hidden="true" tabindex="-1"></a>    ax.plot(xnew, ynew, color<span class="op">=</span><span class="st">&#39;steelblue&#39;</span>)</span>
+<span id="cb15-18"><a href="#cb15-18" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, color<span class="op">=</span><span class="st">&#39;black&#39;</span>, marker<span class="op">=</span><span class="st">&#39;+&#39;</span>, alpha<span class="op">=</span><span class="fl">.8</span>)</span>
+<span id="cb15-19"><a href="#cb15-19" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb15-20"><a href="#cb15-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-21"><a href="#cb15-21" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> Interruptable() <span class="im">as</span> check_interrupted:</span>
+<span id="cb15-22"><a href="#cb15-22" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb15-23"><a href="#cb15-23" aria-hidden="true" tabindex="-1"></a>        check_interrupted()</span>
+<span id="cb15-24"><a href="#cb15-24" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb15-25"><a href="#cb15-25" aria-hidden="true" tabindex="-1"></a>        loglik <span class="op">=</span> torch.<span class="bu">sum</span>(mymodel.logPr(y, x))</span>
+<span id="cb15-26"><a href="#cb15-26" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span>loglik).backward()</span>
+<span id="cb15-27"><a href="#cb15-27" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb15-28"><a href="#cb15-28" aria-hidden="true" tabindex="-1"></a>        epoch <span class="op">+=</span> <span class="dv">1</span></span>
+<span id="cb15-29"><a href="#cb15-29" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-30"><a href="#cb15-30" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">200</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb15-31"><a href="#cb15-31" aria-hidden="true" tabindex="-1"></a>            IPython.display.clear_output(wait<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb15-32"><a href="#cb15-32" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f&#39;epoch=</span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss"> loglik=</span><span class="sc">{</span>loglik<span class="sc">.</span>item()<span class="sc">:.4}</span><span class="ss"> σ=</span><span class="sc">{</span>mymodel<span class="sc">.σ:.4}</span><span class="ss">&#39;</span>)</span>
+<span id="cb15-33"><a href="#cb15-33" aria-hidden="true" tabindex="-1"></a>            plot_quadratic(mymodel)</span></code></pre></div>
+</div>
+</div>
+<h2 id="step-7.-using-a-neural-network">STEP 7. Using a neural
+network</h2>
+<p>A neural network is just another function! We can swap out the <span
+class="math inline">\(\mu(x)=a+bx+c x^2\)</span> function and replace it
+by a neural network, i.e. a sequence of linear maps and nonlinear
+element-wise operations.</p>
+<p><img src="res/pytorch_seq.svg" style="height: 15em; width: auto"/></p>
+<p><img src="res/pytorch_wiggle.png" style="height: 15em"/></p>
+<p>Here’s what a simple neural network looks like in PyTorch:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch.nn <span class="im">as</span> nn</span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RWiggle(nn.Module):</span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.μ <span class="op">=</span> nn.Sequential(</span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">1</span>,<span class="dv">4</span>),</span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>            nn.LeakyReLU(),</span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">4</span>,<span class="dv">20</span>),</span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>            nn.LeakyReLU(),</span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">20</span>,<span class="dv">20</span>),</span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>            nn.LeakyReLU(),</span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">20</span>,<span class="dv">1</span>)</span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a>        )</span></code></pre></div>
+<ul>
+<li><code>torch.nn</code> has a built-in module
+<code>nn.Linear(d,e)</code> for multiplying by a <span
+class="math inline">\(d\times e\)</span> matrix (i.e. it implements the
+function <span class="math inline">\(f(x)=Ax\)</span>). All of the
+entries of the matrix are unknown parameters. They’re initialized
+randomly, and initial guesses affect the outcome of numerical
+optimization, thus every time we create a new <code>RWiggle</code>
+instance and fit it we’re likely to end up with a different fitted
+model.</li>
+<li>It also has a built-in module <a
+href="https://pytorch.org/docs/stable/generated/torch.nn.LeakyReLU.html"><code>nn.LeakyReLU()</code></a>
+which accepts any tensor as its input, and applies a simple non-linear
+function to each element.</li>
+<li>It also has a module <code>nn.Sequential(f1,f2,...,fn)</code> which
+applies a sequence of modules in turn. It saves our having to write out
+<code>x1=f1(x); x2=f2(x1); ...; return xn</code>.</li>
+</ul>
+<p>One thing to watch out for: these standard building blocks are all
+intended to be used in a vectorized way. So <code>nn.Linear(d,e)</code>
+is actually implemented as a function <span
+class="math inline">\(f:\mathbb{R}^{n\times d}\to \mathbb{R}^{n\times
+e}\)</span>. It expects its input to be a <em>matrix</em>, whose rows
+correspond to datapoints, and it applies the linear map <span
+class="math inline">\(\mathbb{R}^d\to\mathbb{R}^e\)</span> separately to
+each row.</p>
+<p>When you’re getting used to PyTorch, it’s a good idea to build up
+your code interactively, calling <code>x.shape</code> on any tensor
+<code>x</code> you create, so you can double-check its size. For
+example,</p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(xkcd.x, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(x.shape)</span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>xm <span class="op">=</span> x[:,<span class="va">None</span>]</span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(xm.shape)</span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> nn.Linear(<span class="dv">1</span>,<span class="dv">4</span>)(xm)</span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(y.shape)</span></code></pre></div>
+<div class="question">
+<p><span class="title">EXERCISE 7.</span> Create a class
+<code>RWiggle</code>, like <code>RQuadratic</code> from exercise 4 but
+using a neural network for the <span class="math inline">\(\mu\)</span>
+function. Fit it interactively, and plot the fit as in exercise 6.</p>
+</div>
+<div>
+<input type="checkbox" id="c7"/><label for="c7">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="kw">class</span> RWiggle(nn.Module):</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> <span class="fu">__init__</span>(<span class="va">self</span>):</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>        <span class="bu">super</span>().<span class="fu">__init__</span>()</span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>        <span class="co"># self.μ maps R^(n×1) to R^(n×1)</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.μ <span class="op">=</span> nn.Sequential(</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">1</span>,<span class="dv">4</span>),</span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>            nn.LeakyReLU(),</span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">4</span>,<span class="dv">20</span>),</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>            nn.LeakyReLU(),</span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">20</span>,<span class="dv">20</span>),</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a>            nn.LeakyReLU(),</span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a>            nn.Linear(<span class="dv">20</span>,<span class="dv">1</span>)</span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb18-14"><a href="#cb18-14" aria-hidden="true" tabindex="-1"></a>        <span class="va">self</span>.σ <span class="op">=</span> nn.Parameter(torch.tensor(<span class="fl">1.0</span>))</span>
+<span id="cb18-15"><a href="#cb18-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">def</span> logPr(<span class="va">self</span>, y, x):</span>
+<span id="cb18-16"><a href="#cb18-16" aria-hidden="true" tabindex="-1"></a>        <span class="co"># x and y are tensors of shape (n,)</span></span>
+<span id="cb18-17"><a href="#cb18-17" aria-hidden="true" tabindex="-1"></a>        <span class="co"># Reshape x to be (n,1), apply μ, then drop the last dimension</span></span>
+<span id="cb18-18"><a href="#cb18-18" aria-hidden="true" tabindex="-1"></a>        m <span class="op">=</span> <span class="va">self</span>.μ(x[:,<span class="va">None</span>])[:,<span class="dv">0</span>]  </span>
+<span id="cb18-19"><a href="#cb18-19" aria-hidden="true" tabindex="-1"></a>        σ<span class="dv">2</span> <span class="op">=</span> <span class="va">self</span>.σ <span class="op">**</span> <span class="dv">2</span></span>
+<span id="cb18-20"><a href="#cb18-20" aria-hidden="true" tabindex="-1"></a>        <span class="cf">return</span> torch.<span class="bu">sum</span>(<span class="op">-</span> <span class="fl">0.5</span><span class="op">*</span>torch.log(<span class="dv">2</span><span class="op">*</span>np.pi<span class="op">*</span>σ<span class="dv">2</span>) <span class="op">-</span> torch.<span class="bu">pow</span>(y <span class="op">-</span> m, <span class="dv">2</span>) <span class="op">/</span> (<span class="dv">2</span><span class="op">*</span>σ<span class="dv">2</span>))</span>
+<span id="cb18-21"><a href="#cb18-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-22"><a href="#cb18-22" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> plot_wiggle(mymodel):</span>
+<span id="cb18-23"><a href="#cb18-23" aria-hidden="true" tabindex="-1"></a>    <span class="cf">with</span> torch.no_grad():</span>
+<span id="cb18-24"><a href="#cb18-24" aria-hidden="true" tabindex="-1"></a>        xnew <span class="op">=</span> torch.linspace(<span class="dv">0</span>,<span class="dv">10</span>,<span class="dv">100</span>)[:,<span class="va">None</span>] <span class="co"># array dim 100×1</span></span>
+<span id="cb18-25"><a href="#cb18-25" aria-hidden="true" tabindex="-1"></a>        ynew <span class="op">=</span> mymodel.μ(xnew)                  <span class="co"># array dim 100×1</span></span>
+<span id="cb18-26"><a href="#cb18-26" aria-hidden="true" tabindex="-1"></a>        xnew <span class="op">=</span> xnew.detach().numpy()[:,<span class="dv">0</span>]       <span class="co"># vector length 100</span></span>
+<span id="cb18-27"><a href="#cb18-27" aria-hidden="true" tabindex="-1"></a>        ynew <span class="op">=</span> ynew.detach().numpy()[:,<span class="dv">0</span>]       <span class="co"># vector length 100</span></span>
+<span id="cb18-28"><a href="#cb18-28" aria-hidden="true" tabindex="-1"></a>        σ <span class="op">=</span> mymodel.σ.item()</span>
+<span id="cb18-29"><a href="#cb18-29" aria-hidden="true" tabindex="-1"></a>    fig,ax <span class="op">=</span> plt.subplots()</span>
+<span id="cb18-30"><a href="#cb18-30" aria-hidden="true" tabindex="-1"></a>    ax.fill_between(xnew, ynew<span class="op">-</span><span class="dv">2</span><span class="op">*</span>σ, ynew<span class="op">+</span><span class="dv">2</span><span class="op">*</span>σ, color<span class="op">=</span><span class="st">&#39;steelblue&#39;</span>, alpha<span class="op">=</span><span class="fl">.6</span>)</span>
+<span id="cb18-31"><a href="#cb18-31" aria-hidden="true" tabindex="-1"></a>    ax.plot(xnew, ynew, color<span class="op">=</span><span class="st">&#39;steelblue&#39;</span>)</span>
+<span id="cb18-32"><a href="#cb18-32" aria-hidden="true" tabindex="-1"></a>    ax.scatter(x, y, color<span class="op">=</span><span class="st">&#39;black&#39;</span>, marker<span class="op">=</span><span class="st">&#39;+&#39;</span>, alpha<span class="op">=</span><span class="fl">.8</span>)</span>
+<span id="cb18-33"><a href="#cb18-33" aria-hidden="true" tabindex="-1"></a>    plt.show()</span>
+<span id="cb18-34"><a href="#cb18-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-35"><a href="#cb18-35" aria-hidden="true" tabindex="-1"></a>x <span class="op">=</span> torch.tensor(xkcd.x, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb18-36"><a href="#cb18-36" aria-hidden="true" tabindex="-1"></a>y <span class="op">=</span> torch.tensor(xkcd.y, dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb18-37"><a href="#cb18-37" aria-hidden="true" tabindex="-1"></a>mymodel <span class="op">=</span> RWiggle()</span>
+<span id="cb18-38"><a href="#cb18-38" aria-hidden="true" tabindex="-1"></a>epoch <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb18-39"><a href="#cb18-39" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(mymodel.parameters())</span>
+<span id="cb18-40"><a href="#cb18-40" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-41"><a href="#cb18-41" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> Interruptable() <span class="im">as</span> check_interrupted:</span>
+<span id="cb18-42"><a href="#cb18-42" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb18-43"><a href="#cb18-43" aria-hidden="true" tabindex="-1"></a>        check_interrupted()</span>
+<span id="cb18-44"><a href="#cb18-44" aria-hidden="true" tabindex="-1"></a>        optimizer.zero_grad()</span>
+<span id="cb18-45"><a href="#cb18-45" aria-hidden="true" tabindex="-1"></a>        loglik <span class="op">=</span> mymodel.logPr(y, x)</span>
+<span id="cb18-46"><a href="#cb18-46" aria-hidden="true" tabindex="-1"></a>        (<span class="op">-</span>loglik).backward()</span>
+<span id="cb18-47"><a href="#cb18-47" aria-hidden="true" tabindex="-1"></a>        optimizer.step()</span>
+<span id="cb18-48"><a href="#cb18-48" aria-hidden="true" tabindex="-1"></a>        epoch <span class="op">+=</span> <span class="dv">1</span>    </span>
+<span id="cb18-49"><a href="#cb18-49" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">200</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb18-50"><a href="#cb18-50" aria-hidden="true" tabindex="-1"></a>            IPython.display.clear_output(wait<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb18-51"><a href="#cb18-51" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f&#39;epoch=</span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss"> loglik=</span><span class="sc">{</span>loglik<span class="sc">.</span>item()<span class="sc">:.4}</span><span class="ss"> σ=</span><span class="sc">{</span>mymodel<span class="sc">.σ:.4}</span><span class="ss">&#39;</span>)</span>
+<span id="cb18-52"><a href="#cb18-52" aria-hidden="true" tabindex="-1"></a>            plot_wiggle(mymodel)</span></code></pre></div>
+</div>
+</div>
+<h2 id="step-8.-batched-gradient-descent">STEP 8. Batched gradient
+descent</h2>
+<p>For large datasets, it’s not helpful to compute the full log
+likelihood of the entire dataset each iteration. It’s better to split
+the dataset up into batches, shuffle the batches, and then for each
+batch in turn compute the log likelihood and take a gradient-descent
+step. It’s better because it injects some randomness into the gradient
+descent process, and this helps to avoid getting stuck at local
+optima.</p>
+<p>In neural network terminology, we use the word ‘epoch’ to mean ‘a
+pass through the entire dataset’.</p>
+<p>PyTorch has a handy utility called <a
+href="https://pytorch.org/docs/stable/data.html#torch.utils.data.DataLoader"><code>DataLoader</code></a>
+for taking an iterable object and splitting it into batches. If we give
+it a matrix, it splits it into groups of rows.</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> torch.tensor(np.column_stack([xkcd.x, xkcd.y]), dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>data_batched <span class="op">=</span> torch.utils.data.DataLoader(data, batch_size<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span></code></pre></div>
+<div class="question">
+<p><span class="title">EXERCISE 8.</span> Modify the code from exercise
+8 to use batched gradient descent.</p>
+</div>
+<div>
+<input type="checkbox" id="c8"/><label for="c8">Show me</label>
+<div class="answer">
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>data <span class="op">=</span> torch.tensor(np.column_stack([xkcd.x, xkcd.y]), dtype<span class="op">=</span>torch.<span class="bu">float</span>)</span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>data_batched <span class="op">=</span> torch.utils.data.DataLoader(data, batch_size<span class="op">=</span><span class="dv">5</span>, shuffle<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>mymodel <span class="op">=</span> RWiggle() <span class="co"># from exercise 7</span></span>
+<span id="cb20-5"><a href="#cb20-5" aria-hidden="true" tabindex="-1"></a>optimizer <span class="op">=</span> torch.optim.Adam(mymodel.parameters())</span>
+<span id="cb20-6"><a href="#cb20-6" aria-hidden="true" tabindex="-1"></a>epoch <span class="op">=</span> <span class="dv">0</span></span>
+<span id="cb20-7"><a href="#cb20-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-8"><a href="#cb20-8" aria-hidden="true" tabindex="-1"></a><span class="cf">with</span> Interruptable() <span class="im">as</span> check_interrupted:</span>
+<span id="cb20-9"><a href="#cb20-9" aria-hidden="true" tabindex="-1"></a>    <span class="cf">while</span> <span class="va">True</span>:</span>
+<span id="cb20-10"><a href="#cb20-10" aria-hidden="true" tabindex="-1"></a>        check_interrupted()</span>
+<span id="cb20-11"><a href="#cb20-11" aria-hidden="true" tabindex="-1"></a>        <span class="cf">for</span> b <span class="kw">in</span> data_batched:</span>
+<span id="cb20-12"><a href="#cb20-12" aria-hidden="true" tabindex="-1"></a>            optimizer.zero_grad()</span>
+<span id="cb20-13"><a href="#cb20-13" aria-hidden="true" tabindex="-1"></a>            loglik <span class="op">=</span> torch.<span class="bu">sum</span>(mymodel.logPr(b[:,<span class="dv">1</span>,<span class="va">None</span>], b[:,<span class="dv">0</span>,<span class="va">None</span>]))</span>
+<span id="cb20-14"><a href="#cb20-14" aria-hidden="true" tabindex="-1"></a>            (<span class="op">-</span>loglik).backward()</span>
+<span id="cb20-15"><a href="#cb20-15" aria-hidden="true" tabindex="-1"></a>            optimizer.step()</span>
+<span id="cb20-16"><a href="#cb20-16" aria-hidden="true" tabindex="-1"></a>        epoch <span class="op">=</span> epoch <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb20-17"><a href="#cb20-17" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb20-18"><a href="#cb20-18" aria-hidden="true" tabindex="-1"></a>        <span class="cf">if</span> epoch <span class="op">%</span> <span class="dv">200</span> <span class="op">==</span> <span class="dv">0</span>:</span>
+<span id="cb20-19"><a href="#cb20-19" aria-hidden="true" tabindex="-1"></a>            IPython.display.clear_output(wait<span class="op">=</span><span class="va">True</span>)</span>
+<span id="cb20-20"><a href="#cb20-20" aria-hidden="true" tabindex="-1"></a>            <span class="bu">print</span>(<span class="ss">f&#39;epoch=</span><span class="sc">{</span>epoch<span class="sc">}</span><span class="ss"> loglik=</span><span class="sc">{</span>loglik<span class="sc">.</span>item()<span class="sc">:.4}</span><span class="ss"> σ=</span><span class="sc">{σ:.4}</span><span class="ss">&#39;</span>)</span>
+<span id="cb20-21"><a href="#cb20-21" aria-hidden="true" tabindex="-1"></a>            plot_wiggle(mymodel) <span class="co"># from exercise 6</span></span></code></pre></div>
+</div>
+</div>
+<h2 id="step-9.-challenge">STEP 9. Challenge</h2>
+<p>Here is a dataset consisting of <span
+class="math inline">\((x,(y^{(1)},y^{(2)}))\)</span> pairs.</p>
+<p><img src="res/pytorch_pointcloud.png" style="height: 15em"/></p>
+<p>For this challenge, you are asked to treat <span
+class="math inline">\((y^{(1)}_i,y^{(2)}_i)\)</span> as the response for
+record <span class="math inline">\(i\in\{1,\dots,10\,000\}\)</span>, and
+<span class="math inline">\(x_i\)</span> as the predictor, and to model
+the dataset as <span class="math display">\[
+\begin{bmatrix} Y^{(1)}_i\\Y^{(2)}_i \end{bmatrix}
+\sim
+\mu(x_i) +
+\begin{bmatrix} N(0,\sigma^2)\\N(0,\sigma^2) \end{bmatrix}
+\]</span> Here <span
+class="math inline">\(\mu:[0,1]\to\mathbb{R}^2\)</span> is some function
+to be learned, and the standard deviation <span
+class="math inline">\(\sigma\)</span> is also to be learned. The idea is
+that <span class="math inline">\(\mu(x)\)</span> can be thought of as a
+line drawing, as you’ll see when you run the code below to show your
+fitted <span class="math inline">\(\mu\)</span> function.</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">&#39;https://www.cl.cam.ac.uk/teaching/current/DataSci/data/pointcloud.csv&#39;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>pointcloud <span class="op">=</span> pandas.read_csv(url)</span>
+<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
+<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">&#39;equal&#39;</span>)</span>
+<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>ax.scatter(pointcloud.y1, pointcloud.y2, s<span class="op">=</span><span class="dv">1</span>, alpha<span class="op">=</span><span class="fl">.1</span>)</span>
+<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>xnew <span class="op">=</span> np.linspace(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1000</span>)</span>
+<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>ynew <span class="op">=</span> ... <span class="co"># compute μ(xnew), get a 1000×2 matrix</span></span>
+<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>ax.plot(ynew[:,<span class="dv">0</span>], ynew[:,<span class="dv">1</span>])</span>
+<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div>
+<div class="question">
+<p><span class="title">CHALLENGE.</span> [DJW: I’m waiting for Moodle to
+be set up to run PyTorch models. Once it’s ready, you’ll be able to
+upload your fitted model, and Moodle will evaluate how well it does. In
+the meantime, you should easily be able to get an average log likelihood
+score of 0.93, averaged across the 10,000 points in the dataset.]</p>
+</div>
+</body>
+</html>
