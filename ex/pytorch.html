@@ -550,6 +550,12 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb17-1"><a h
 <code>RWiggle</code>, like <code>RQuadratic</code> from exercise 4 but
 using a neural network for the <span class="math inline">\(\mu\)</span>
 function. Fit it interactively, and plot the fit as in exercise 6.</p>
+<p>(It’s a bit silly to use a neural network with many layers to learn
+an arbitrary function like this. Deep neural networks are great for
+learning higher-order patterns — for example, the first few layers might
+learn to detect straight lines and corners in an image, and later layers
+might learn to recognize shapes like squares and triangles. In this toy
+example, there’s no such higher-order structure to learn.)</p>
 </div>
 <div>
 <input type="checkbox" id="c7"/><label for="c7">Show me</label>
@@ -660,42 +666,20 @@ class="sourceCode python"><code class="sourceCode python"><span id="cb20-1"><a h
 </div>
 </div>
 <h2 id="step-9.-challenge">STEP 9. Challenge</h2>
-<p>Here is a dataset consisting of <span
-class="math inline">\((x,(y^{(1)},y^{(2)}))\)</span> pairs.</p>
-<p><img src="res/pytorch_pointcloud.png" style="height: 15em"/></p>
-<p>For this challenge, you are asked to treat <span
-class="math inline">\((y^{(1)}_i,y^{(2)}_i)\)</span> as the response for
-record <span class="math inline">\(i\in\{1,\dots,10\,000\}\)</span>, and
-<span class="math inline">\(x_i\)</span> as the predictor, and to model
-the dataset as <span class="math display">\[
-\begin{bmatrix} Y^{(1)}_i\\Y^{(2)}_i \end{bmatrix}
+<p>Now try it yourself!</p>
+<p>The <a
+href="https://www.cl.cam.ac.uk/teaching/2324/DataSci/ticks/pytorch.html">pytorch
+challenge</a> gives you a dataset consisting of <span
+class="math inline">\((x,y)\)</span> pairs, where <span
+class="math inline">\(x\in[0,1]\)</span> and <span
+class="math inline">\(y\in\mathbb{R}^2\)</span>, and asks you to learn a
+smooth line through these <span class="math inline">\(y\)</span> points
+by fitting the model <span class="math display">\[
+\begin{bmatrix} Y_{1}\\Y_{2} \end{bmatrix}
 \sim
-\mu(x_i) +
+\mu(x) +
 \begin{bmatrix} N(0,\sigma^2)\\N(0,\sigma^2) \end{bmatrix}
-\]</span> Here <span
-class="math inline">\(\mu:[0,1]\to\mathbb{R}^2\)</span> is some function
-to be learned, and the standard deviation <span
-class="math inline">\(\sigma\)</span> is also to be learned. The idea is
-that <span class="math inline">\(\mu(x)\)</span> can be thought of as a
-line drawing, as you’ll see when you run the code below to show your
-fitted <span class="math inline">\(\mu\)</span> function.</p>
-<div class="sourceCode" id="cb21"><pre
-class="sourceCode python"><code class="sourceCode python"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>url <span class="op">=</span> <span class="st">&#39;https://www.cl.cam.ac.uk/teaching/current/DataSci/data/pointcloud.csv&#39;</span></span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>pointcloud <span class="op">=</span> pandas.read_csv(url)</span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>fig,ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>(<span class="dv">4</span>,<span class="dv">3</span>))</span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>ax.set_aspect(<span class="st">&#39;equal&#39;</span>)</span>
-<span id="cb21-6"><a href="#cb21-6" aria-hidden="true" tabindex="-1"></a>ax.scatter(pointcloud.y1, pointcloud.y2, s<span class="op">=</span><span class="dv">1</span>, alpha<span class="op">=</span><span class="fl">.1</span>)</span>
-<span id="cb21-7"><a href="#cb21-7" aria-hidden="true" tabindex="-1"></a>xnew <span class="op">=</span> np.linspace(<span class="dv">0</span>,<span class="dv">1</span>,<span class="dv">1000</span>)</span>
-<span id="cb21-8"><a href="#cb21-8" aria-hidden="true" tabindex="-1"></a>ynew <span class="op">=</span> ... <span class="co"># compute μ(xnew), get a 1000×2 matrix</span></span>
-<span id="cb21-9"><a href="#cb21-9" aria-hidden="true" tabindex="-1"></a>ax.plot(ynew[:,<span class="dv">0</span>], ynew[:,<span class="dv">1</span>])</span>
-<span id="cb21-10"><a href="#cb21-10" aria-hidden="true" tabindex="-1"></a>plt.show()</span></code></pre></div>
-<div class="question">
-<p><span class="title">CHALLENGE.</span> [DJW: I’m waiting for Moodle to
-be set up to run PyTorch models. Once it’s ready, you’ll be able to
-upload your fitted model, and Moodle will evaluate how well it does. In
-the meantime, you should easily be able to get an average log likelihood
-score of 0.93, averaged across the 10,000 points in the dataset.]</p>
-</div>
+\]</span></p>
+<p><img src="https://www.cl.cam.ac.uk/teaching/current/DataSci/ticks/res/pytorch_pointcloud.png" style="height: 15em"/></p>
 </body>
 </html>

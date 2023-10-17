@@ -489,6 +489,11 @@ print(y.shape)
 <span class="title">EXERCISE 7.</span>
 Create a class `RWiggle`, like `RQuadratic` from exercise 4 but using a neural network for the $\mu$ function.
 Fit it interactively, and plot the fit as in exercise 6.
+
+(It's a bit silly to use a neural network with many layers to learn an arbitrary function like this.
+Deep neural networks are great for learning higher-order patterns &mdash; for example, the first few layers
+might learn to detect straight lines and corners in an image, and later layers might learn to recognize
+shapes like squares and triangles. In this toy example, there's no such higher-order structure to learn.)
 </div>
 
 <div>
@@ -608,42 +613,16 @@ with Interruptable() as check_interrupted:
 
 ## STEP 9. Challenge
 
-Here is a dataset consisting of $(x,(y^{(1)},y^{(2)}))$ pairs. 
+Now try it yourself! 
 
-<img src="res/pytorch_pointcloud.png" style="height: 15em"/>
-
-For this challenge, you are asked to treat $(y^{(1)}_i,y^{(2)}_i)$ as the response
-for record $i\in\{1,\dots,10\,000\}$,
-and $x_i$ as the predictor, and to model the dataset as
+The [pytorch challenge](https://www.cl.cam.ac.uk/teaching/2324/DataSci/ticks/pytorch.html)
+gives you a dataset consisting of $(x,y)$ pairs, where $x\in[0,1]$ and $y\in\mathbb{R}^2$,
+and asks you to learn a smooth line through these $y$ points by fitting the model
 $$
-\begin{bmatrix} Y^{(1)}_i\\Y^{(2)}_i \end{bmatrix}
+\begin{bmatrix} Y_{1}\\Y_{2} \end{bmatrix}
 \sim
-\mu(x_i) +
+\mu(x) +
 \begin{bmatrix} N(0,\sigma^2)\\N(0,\sigma^2) \end{bmatrix}
 $$
-Here $\mu:[0,1]\to\mathbb{R}^2$ is some function to be learned, 
-and the standard deviation $\sigma$ is also to be learned. The idea is that
-$\mu(x)$ can be thought of as a line drawing, as you'll see when you run the
-code below to show your fitted $\mu$ function.
 
-```python
-url = 'https://www.cl.cam.ac.uk/teaching/current/DataSci/data/pointcloud.csv'
-pointcloud = pandas.read_csv(url)
-
-fig,ax = plt.subplots(figsize=(4,3))
-ax.set_aspect('equal')
-ax.scatter(pointcloud.y1, pointcloud.y2, s=1, alpha=.1)
-xnew = np.linspace(0,1,1000)
-ynew = ... # compute μ(xnew), get a 1000×2 matrix
-ax.plot(ynew[:,0], ynew[:,1])
-plt.show()
-```
-
-
-<div class="question">
-<span class="title">CHALLENGE.</span>
-[DJW: I'm waiting for Moodle to be set up to run PyTorch models. Once it's ready, you'll be able to upload your fitted model,
-and Moodle will evaluate how well it does. In the meantime, you should easily be able to get an average log likelihood score of 0.93,
-averaged across the 10,000 points in the dataset.]
-</div>
-
+<img src="https://www.cl.cam.ac.uk/teaching/current/DataSci/ticks/res/pytorch_pointcloud.png" style="height: 15em"/>
