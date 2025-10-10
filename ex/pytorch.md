@@ -103,7 +103,7 @@ our function object. Here's an example:
 
 ```python
 import torch
-import torch.nn
+import torch.nn as nn
 
 class MyFunction(nn.Module):
     def __init__(self):
@@ -423,7 +423,7 @@ with Interruptable() as check_interrupted:
 
         if epoch % 200 == 0:
             IPython.display.clear_output(wait=True)
-            print(f'epoch={epoch} loglik={loglik.item():.4} σ={mymodel.σ:.4}')
+            print(f'epoch={epoch} loglik={loglik.item():.4} σ={mymodel.σ.item():.4}')
             plot_quadratic(mymodel)
 ```
 </div>
@@ -550,7 +550,7 @@ with Interruptable() as check_interrupted:
         epoch += 1    
         if epoch % 200 == 0:
             IPython.display.clear_output(wait=True)
-            print(f'epoch={epoch} loglik={loglik.item():.4} σ={mymodel.σ:.4}')
+            print(f'epoch={epoch} loglik={loglik.item():.4} σ={mymodel.σ.item():.4}')
             plot_wiggle(mymodel)
 ```
 </div>
@@ -604,7 +604,7 @@ with Interruptable() as check_interrupted:
 
         if epoch % 200 == 0:
             IPython.display.clear_output(wait=True)
-            print(f'epoch={epoch} loglik={loglik.item():.4} σ={σ:.4}')
+            print(f'epoch={epoch} loglik={loglik.item():.4} σ={mymodel.σ.item():.4}')
             plot_wiggle(mymodel) # from exercise 6
 ```
 </div>
