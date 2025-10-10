@@ -60,6 +60,8 @@ span.linenos.special { color: #000000; background-color: #ffffc0; padding-left: 
 <style type="text/css">
     .container { width:100% !important; }
 .run_this_cell { display: none !important; }
+.ui-widget-header { display: none; }
+.btn-toolbar { display: none; }
 
   </style>
 
@@ -14599,7 +14601,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[5]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -14619,7 +14621,7 @@ body[data-format='mobile'] .jp-OutputArea-child .jp-OutputArea-output {
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="Data-Science">Data Science<a class="anchor-link" href="#Data-Science">&#182;</a></h1><h2 id="Example-Sheet-1-%E2%80%94-practical-exercises">Example Sheet 1 &#8212; practical exercises<a class="anchor-link" href="#Example-Sheet-1-%E2%80%94-practical-exercises">&#182;</a></h2><p>Submit your answers on Moodle. You can upload either a Jupyter notebook, or plain Python code. THE MOODLE TESTER IS NOT YET ENABLED. IT WILL BE ENABLED ON 2023-10-09.</p>
+<h1 id="Data-Science">Data Science<a class="anchor-link" href="#Data-Science">&#182;</a></h1><h2 id="Example-Sheet-1-%E2%80%94-practical-exercises">Example Sheet 1 &#8212; practical exercises<a class="anchor-link" href="#Example-Sheet-1-%E2%80%94-practical-exercises">&#182;</a></h2><p>Submit your answers on Moodle. You can upload either a Jupyter notebook, or plain Python code.</p>
 
 </div>
 </div>
@@ -14642,7 +14644,7 @@ the Poisson(λ) distribution. Estimate λ using <code>scipy.optimize.fmin</code>
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[3]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="k">class</span> <span class="nc">PoissonModel</span><span class="p">():</span>
@@ -14742,7 +14744,7 @@ where the last term tells us the decadal average temperature. (Take decades to b
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput " data-mime-type="text/markdown">
-<h1 id="TEST">TEST<a class="anchor-link" href="#TEST">&#182;</a></h1><p>NOTE: The Moodle checker will look for a markdown cell with the contents <code># TEST</code>, and ignore everything beneath it. Put your working code above this cell, and put any experiments and tests below.</p>
+<h1 id="TEST">TEST<a class="anchor-link" href="#TEST">&#182;</a></h1><p>NOTE: The Moodle checker will look for a markdown cell with the contents <code># TEST</code>, and ignore everything beneath it. Put your working code above this cell, and put your experiments below.</p>
 
 </div>
 </div>
@@ -14752,7 +14754,7 @@ where the last term tells us the decadal average temperature. (Take decades to b
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="kn">import</span> <span class="nn">pandas</span>
@@ -14769,7 +14771,7 @@ where the last term tells us the decadal average temperature. (Take decades to b
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[&nbsp;]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In&nbsp;[8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Test the Poisson model (where we know the true answer from algebra)</span>
@@ -14795,7 +14797,7 @@ where the last term tells us the decadal average temperature. (Take decades to b
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot the piecewise linear model</span>
 
-<span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://www.cl.cam.ac.uk/teaching/2223/DataSci/data/piecewiselinear.csv&#39;</span><span class="p">)</span>
+<span class="n">df</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://www.cl.cam.ac.uk/teaching/2526/DataSci/data/piecewiselinear.csv&#39;</span><span class="p">)</span>
 
 <span class="n">m</span> <span class="o">=</span> <span class="n">PiecewiseLinearModel</span><span class="p">()</span>
 <span class="n">m</span><span class="o">.</span><span class="n">fit</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">x</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">y</span><span class="p">,</span> <span class="mf">2.8</span><span class="p">)</span>
@@ -14822,7 +14824,7 @@ where the last term tells us the decadal average temperature. (Take decades to b
      <div class="CodeMirror cm-s-jupyter">
 <div class=" highlight hl-ipython3"><pre><span></span><span class="c1"># Plot the stepwise climate model</span>
 
-<span class="n">climate</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://www.cl.cam.ac.uk/teaching/2324/DataSci/data/climate_202309.csv&#39;</span><span class="p">)</span>
+<span class="n">climate</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">&#39;https://www.cl.cam.ac.uk/teaching/2526/DataSci/data/climate_202510.csv&#39;</span><span class="p">)</span>
 <span class="n">df</span> <span class="o">=</span> <span class="n">climate</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">climate</span><span class="o">.</span><span class="n">station</span><span class="o">==</span><span class="s1">&#39;Oxford&#39;</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="o">~</span><span class="n">pandas</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">climate</span><span class="o">.</span><span class="n">temp</span><span class="p">))]</span>
 
 <span class="n">m</span> <span class="o">=</span> <span class="n">StepPeriodicModel</span><span class="p">()</span>
