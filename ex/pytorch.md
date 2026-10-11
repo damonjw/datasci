@@ -615,14 +615,35 @@ with Interruptable() as check_interrupted:
 
 Now try it yourself! 
 
-The [pytorch challenge](https://www.cl.cam.ac.uk/teaching/2324/DataSci/ticks/pytorch.html)
-gives you a dataset consisting of $(x,y)$ pairs, where $x\in[0,1]$ and $y\in\mathbb{R}^2$,
-and asks you to learn a smooth line through these $y$ points by fitting the model
+In [`pointcloud.csv`](https://www.cl.cam.ac.uk/teaching/current/DataSci/data/pointcloud.csv)
+you can find a dataset consisting of $(x,y)$ pairs, with $x\in[0,1]$ and 
+$y=(y_1,y_2)\in\mathbb{R}^2$.
+
+<img src="https://www.cl.cam.ac.uk/teaching/current/DataSci/ticks/res/pytorch_pointcloud.png" style="height: 15em"/>
+
+Your task is to model the dataset as
 $$
 \begin{bmatrix} Y_{1}\\Y_{2} \end{bmatrix}
 \sim
 \mu(x) +
 \begin{bmatrix} N(0,\sigma^2)\\N(0,\sigma^2) \end{bmatrix}
 $$
+Here $\mu:[0,1]\to\mathbb{R}^2$ is some function to be learned, and the standard deviation
+$\sigma$ is also to be learned. The idea is that $\mu(x)$ can be thought of as a line
+drawing, as you'll see when you run the code below to show your fitted $\mu$ function:
 
-<img src="https://www.cl.cam.ac.uk/teaching/current/DataSci/ticks/res/pytorch_pointcloud.png" style="height: 15em"/>
+```python
+url = 'https://www.cl.cam.ac.uk/teaching/current/DataSci/data/pointcloud.csv'
+pointcloud = pandas.read_csv(url)
+
+fig,ax = plt.subplots(figsize=(4,3))
+ax.set_aspect('equal')
+ax.scatter(pointcloud.y1, pointcloud.y2, s=1, alpha=.1)
+xnew = np.linspace(0,1,1000)
+ynew = ... # compute μ(xnew), get a 1000×2 matrix
+ax.plot(ynew[:,0], ynew[:,1])
+plt.show()
+```
+
+(There is no Moodle submission to score you on this task. You ought to be able
+to see how successful your model is just by looking at the output plot.)
